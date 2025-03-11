@@ -97,7 +97,7 @@ SHEweldo is designed to serve a diverse range of users:
 
 ## Collaborators 🤝
 
-1. Alimagno, Timothy Dave C.  
-2. Banaag, Vince Clyde S.  
-3. Maranan, Deogenes Gregorio S.  
-4. Montoya, Ram Greggor D.
+1. [Alimagno, Timothy Dave C.](https://github.com/mothy-08)  
+2. [Banaag, Vince Clyde S.](https://github.com/mimikyow)  
+3. [Maranan, Deogenes Gregorio S.](https://github.com/DeogenesMaranan)  
+4. [Montoya, Ram Greggor D.](https://github.com/rmuuu)
