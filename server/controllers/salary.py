@@ -14,3 +14,6 @@ class SalaryController:
     def get_comparison(self, data):
         # TODO: Logic for comparing salaries
         return {"comparison": "Your salary is in the 80th percentile"}
+    
+    def test(self):
+        return {"isSuccessful": "Success"}

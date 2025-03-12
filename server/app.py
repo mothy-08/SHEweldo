@@ -31,6 +31,11 @@ class AppAPI:
             data = request.json
             response = self.service.get_comparison(data)
             return jsonify(response)
+        
+        @self.app.route("/test", methods=["GET"])
+        def test():
+            response = self.service.test()
+            return jsonify(response)
 
     def run(self, host="0.0.0.0", port=5000):
         self.app.run(host=host, port=port, debug=True)
