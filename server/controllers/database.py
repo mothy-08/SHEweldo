@@ -2,16 +2,16 @@ import sqlite3
 
 class DatabaseController:
     def __init__(self, db_name="record.db"):
-        self.db_name = db_name
-        self.connection = None
-        self.connect()
+        self._db_name = db_name
+        self._connection = None
+        self._connect()
 
-    def connect(self):
-        self.connection = sqlite3.connect(self.db_name, check_same_thread=False)
-        self.create_tables()
+    def _connect(self):
+        self._connection = sqlite3.connect(self._db_name, check_same_thread=False)
+        self._create_tables()
 
-    def create_tables(self):
-        cursor = self.connection.cursor()
+    def _create_tables(self):
+        cursor = self._connection.cursor()
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS companies (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -37,18 +37,18 @@ class DatabaseController:
                 FOREIGN KEY(company_hash) REFERENCES companies(hash)
             )
         ''')
-        self.connection.commit()
+        self._connection.commit()
 
     def get_company(self, hash: str):
-        cursor = self.connection.cursor()
+        cursor = self._connection.cursor()
         cursor.execute("SELECT * FROM companies WHERE hash = ?", (hash,))
         return cursor.fetchone()
 
     def insert_record(self, record):
-        cursor = self.connection.cursor()
+        cursor = self._connection.cursor()
         cursor.execute("INSERT INTO salaries (company_hash, years_at_company, total_experience, salary_amount, gender, submission_date, is_well_compensated, department, job_title) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
                        (record.company.generate_hash(), record.years_at_company, record.total_experience, record.salary_amount, record.gender, record.submission_date, record.is_well_compensated, record.department, record.job_title))
-        self.connection.commit()
+        self._connection.commit()
         return True
 
     def get_records(self, filters):
@@ -62,10 +62,10 @@ class DatabaseController:
             query += " AND job_title = ?"
             params.append(filters["position"])
         
-        cursor = self.connection.cursor()
+        cursor = self._connection.cursor()
         cursor.execute(query, tuple(params))
         return cursor.fetchall()
 
     def close(self):
-        if self.connection:
-            self.connection.close()
+        if self._connection:
+            self._connection.close()
