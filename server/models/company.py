@@ -8,13 +8,13 @@ class Company:
         self.__country = country
 
     @property
-    def name(self):
+    def get_name(self):
         return self.__name
 
     @property
-    def country(self):
+    def get_country(self):
         return self.__country
 
     def generate_hash(self):
-        hash_input = f"{self.name}{self.country}".encode()
+        hash_input = f"{self.get_name}{self.get_country}".encode()
         return hashlib.sha256(hash_input).hexdigest()
