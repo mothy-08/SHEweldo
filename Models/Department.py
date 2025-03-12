@@ -11,3 +11,4 @@ class Department(Enum):
     TECHNOLOGY_IT = "it"
     PRODUCT_RD = "product_rd"
     SUPPLY_CHAIN_LOGISTICS = "supply"
+    OTHER = "other"
