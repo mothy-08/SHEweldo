@@ -41,7 +41,7 @@ class AppAPI:
         self.app.run(host=host, port=port, debug=True)
 
 if __name__ == "__main__":
-    salary_controller = SalaryController()
     db_controller = DatabaseController()
+    salary_controller = SalaryController(db_controller)
     api = AppAPI(salary_controller, db_controller)
     api.run()

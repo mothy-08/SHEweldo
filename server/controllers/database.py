@@ -47,7 +47,7 @@ class DatabaseController:
     def insert_record(self, record):
         cursor = self._connection.cursor()
         cursor.execute("INSERT INTO salaries (company_hash, years_at_company, total_experience, salary_amount, gender, submission_date, is_well_compensated, department, job_title) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                       (record.company.generate_hash(), record.years_at_company, record.total_experience, record.salary_amount, record.gender, record.submission_date, record.is_well_compensated, record.department, record.job_title))
+               (record.get_company_hash, record.get_years_at_company, record.get_total_experience, record.get_salary_amount, record.get_gender, record.get_submission_date, record.get_is_well_compensated, record.get_department, record.get_job_title))
         self._connection.commit()
         return True
 
