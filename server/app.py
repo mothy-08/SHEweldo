@@ -1,9 +1,9 @@
 from flask import Flask, request, jsonify
-from controllers.salary import SalaryController
+from controllers.salary import SalaryService
 from controllers.database import DatabaseController
 
 class AppAPI:
-    def __init__(self, service: SalaryController, db: DatabaseController):
+    def __init__(self, service: SalaryService, db: DatabaseController):
         self.service = service
         self.db = db
         self.app = Flask(__name__)
@@ -42,6 +42,6 @@ class AppAPI:
 
 if __name__ == "__main__":
     db_controller = DatabaseController()
-    salary_controller = SalaryController(db_controller)
+    salary_controller = SalaryService(db_controller)
     api = AppAPI(salary_controller, db_controller)
     api.run()
