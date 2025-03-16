@@ -1,9 +1,12 @@
 from abc import ABC, abstractmethod
-from models.salary_record import SalaryRecord
-from server.controllers.database import DatabaseController
-from models.company import Company
-from models.department import Department
 from typing import Dict, Any
+
+from entity import SalaryRecord
+from entity import Company
+
+from server.controllers.database import DatabaseController
+
+from models import Department
 
 class ISalaryService(ABC):
     @abstractmethod
