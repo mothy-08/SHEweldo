@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
-from models.company import Company
-from models.salary_record import SalaryRecord
+from server.models.entities import SalaryRecord, Company
 import sqlite3
 from typing import TypedDict, Optional
 

@@ -2,9 +2,7 @@ from abc import ABC, abstractmethod
 from enum import Enum
 import hashlib
 
-from models.company_size import CompanySize
-from models.department import Department
-from models.gender import Gender
+from server.models.enums import CompanySize, Department, Gender
 
 class BaseEntity(ABC):
     def __init__(self, entity_id: str):

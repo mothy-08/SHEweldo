@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify
-from controllers.salary import SalaryService
+from server.services.salary import SalaryService
 from controllers.database import DatabaseController
 
 class AppAPI:

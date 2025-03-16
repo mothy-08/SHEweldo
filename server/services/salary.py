@@ -1,12 +1,9 @@
 from abc import ABC, abstractmethod
 from typing import Dict, Any
 
-from entity import SalaryRecord
-from entity import Company
-
+from server.models.entities import SalaryRecord, Company
 from server.controllers.database import DatabaseController
-
-from models import Department
+from server.models.enums import Department
 
 class ISalaryService(ABC):
     @abstractmethod
