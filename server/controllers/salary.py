@@ -1,12 +1,32 @@
+from abc import ABC, abstractmethod
 from models.salary_record import SalaryRecord
 from server.controllers.database import DatabaseController
 from models.company import Company
+from models.department import Department
+from typing import Dict, Any
 
-class SalaryController:
+class ISalaryService(ABC):
+    @abstractmethod
+    def calculate_averages(self, department: Department) -> Dict[str, float]:
+        pass
+    
+    @abstractmethod
+    def get_salary_distribution(self) -> Dict[str, float]:
+        pass
+    
+    @abstractmethod
+    def generate_benchmark(self, company: Company) -> Dict[str, Any]:
+        pass
+    
+    @abstractmethod
+    def generate_comparison(self, user_record: SalaryRecord) -> Dict[str, Any]:
+        pass
+
+class SalaryService(ISalaryService):
     def __init__(self, db_controller: DatabaseController):
         self.db_controller = db_controller
 
-    def submit_salary(self, data):
+    def submit_salary(self, data: Dict[str, Any]):
         try:
             company = Company(
                 name=data.get("company"),
@@ -17,12 +37,12 @@ class SalaryController:
 
             salary_record = SalaryRecord(
                 company=company,
-                years_at_company=data.get("years_at_company"),
-                total_experience=data.get("total_experience"),
-                salary_amount=data.get("salary_amount"),
-                gender=data.get("gender"),
+                years_at_company=data.get("years_at_company", 0),
+                total_experience=data.get("total_experience", 0),
+                salary_amount=data.get("salary_amount", 0.0),
+                gender=data.get("gender", "Not specified"),
                 submission_date=data.get("submission_date"),
-                is_well_compensated=data.get("is_well_compensated"),
+                is_well_compensated=data.get("is_well_compensated", False),
                 department=data.get("department"),
                 job_title=data.get("job_title")
             )
@@ -36,18 +56,24 @@ class SalaryController:
         except Exception as e:
             return {"message": "An error occurred", "error": str(e)}, 500
 
+    def calculate_averages(self, department: Department) -> Dict[str, float]:
+        # TODO: Implement database query to get salary averages by department
+        return {"average_salary": 75000.0}
 
-    def get_averages(self):
-        # TODO: Logic for retrieving salary averages
-        return {"average_salary": 75000}
+    def get_salary_distribution(self) -> Dict[str, float]:
+        # TODO: Implement logic to calculate salary distribution
+        return {"median_salary": 65000.0, "percentile_90": 120000.0}
 
-    def get_benchmark(self):
-        # TODO: Logic for benchmarking salaries
-        return {"benchmark": "Above average"}
+    def generate_benchmark(self, company: Company) -> Dict[str, Any]:
+        # TODO: Implement logic to benchmark salaries within a company
+        return {"benchmark": "Above average", "company": company.name}
 
-    def get_comparison(self, data):
-        # TODO: Logic for comparing salaries
-        return {"comparison": "Your salary is in the 80th percentile"}
-    
-    def test(self):
+    def generate_comparison(self, user_record: SalaryRecord) -> Dict[str, Any]:
+        # TODO: Implement logic to compare a user's salary with the dataset
+        return {
+            "comparison": "Your salary is in the 80th percentile",
+            "user_salary": user_record.get_salary_amount(),
+        }
+
+    def test(self) -> Dict[str, str]:
         return {"isSuccessful": "Success"}
