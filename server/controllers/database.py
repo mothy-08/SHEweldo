@@ -3,7 +3,7 @@ from server.models.entities import SalaryRecord, Company
 import sqlite3
 from typing import TypedDict, Optional
 
-class IDatabase(ABC):
+class IDatabaseController(ABC):
     @abstractmethod
     def get_company(self, hash_val: str) -> Optional[Company]:
         pass
@@ -24,7 +24,7 @@ class FilterParams(TypedDict, total=False):
     company_hash: str
     position: str
 
-class DatabaseController(IDatabase):
+class DatabaseController(IDatabaseController):
     def __init__(self, db_name="record.db"):
         self._db_name = db_name
         self._connection = None
