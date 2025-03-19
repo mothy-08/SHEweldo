@@ -3,7 +3,7 @@ from typing import Dict, Any
 
 from server.models.entities import SalaryRecord, Company
 from server.controllers.database import DatabaseController
-from server.models.enums import Department
+from server.models.enums import Department, EnumConverter
 
 class ISalaryService(ABC):
     @abstractmethod
@@ -25,13 +25,14 @@ class ISalaryService(ABC):
 class SalaryService(ISalaryService):
     def __init__(self, db_controller: DatabaseController):
         self.db_controller = db_controller
+        self.enum_converter = EnumConverter
 
     def submit_salary(self, data: Dict[str, Any]):
         try:
             company = Company(
                 name=data.get("company"),
-                size=data.get("company_size"),
-                industry=data.get("industry"),
+                size=self.enum_converter.int_to_company_size(data.get("company_size")),
+                industry=self.enum_converter.str_to_industry(data.get("industry")),
                 country=data.get("country")
             )
 
@@ -40,10 +41,10 @@ class SalaryService(ISalaryService):
                 years_at_company=data.get("years_at_company", 0),
                 total_experience=data.get("total_experience", 0),
                 salary_amount=data.get("salary_amount", 0.0),
-                gender=data.get("gender", "Not specified"),
+                gender=self.enum_converter.str_to_gender(data.get("gender", "Not specified")),
                 submission_date=data.get("submission_date"),
                 is_well_compensated=data.get("is_well_compensated", False),
-                department=data.get("department"),
+                department=self.enum_converter.str_to_department(data.get("department")),
                 job_title=data.get("job_title")
             )
 

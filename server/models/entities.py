@@ -1,8 +1,7 @@
 from abc import ABC, abstractmethod
-from enum import Enum
 import hashlib
 
-from server.models.enums import CompanySize, Department, Gender
+from server.models.enums import *
 
 class BaseEntity(ABC):
     def __init__(self, entity_id: str):
@@ -28,7 +27,7 @@ class Company(BaseEntity):
         return all([
             isinstance(self.__size, CompanySize),
             len(self.__name.strip()) > 0,
-            len(self.__industry.strip()) > 0,
+            isinstance(self.__industry, Industry),
             len(self.__country.strip()) > 0
         ])
 
