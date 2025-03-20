@@ -91,35 +91,6 @@ class AppAPI:
         def method_not_allowed(error):
             return jsonify({"error": "Method not allowed"}), 405
 
-    def _create_company(self, data: dict) -> Company:
-        try:
-            return Company(
-                entity_id=data.get("id"),
-                name=data["name"],
-                size=CompanySize[data["size"].upper()],
-                industry=data["industry"],
-                country=data["country"]
-            )
-        except KeyError as e:
-            raise ValueError(f"Missing required field: {e}")
-
-    def _create_salary_record(self, data: dict, company: Company) -> SalaryRecord:
-        try:
-            return SalaryRecord(
-                entity_id=data.get("id"),
-                company=company,
-                years_at_company=int(data["years_at_company"]),
-                total_experience=int(data["total_experience"]),
-                salary_amount=float(data["salary_amount"]),
-                gender=Gender[data["gender"].upper()],
-                submission_date=date.fromisoformat(data["submission_date"]),
-                is_well_compensated=bool(data["is_well_compensated"]),
-                department=Department[data["department"].upper()],
-                job_title=data["job_title"]
-            )
-        except (KeyError, ValueError) as e:
-            raise ValueError(f"Invalid data format: {e}")
-
     def run(self, host: str = "0.0.0.0", port: int = 5000, debug: bool = False):
         self._app.run(host=host, port=port, debug=debug)
 
