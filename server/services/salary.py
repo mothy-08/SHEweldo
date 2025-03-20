@@ -46,6 +46,9 @@ class SalaryService(ISalaryService):
                 job_title=data.get("job_title")
             )
 
+            if not salary_record.validate():
+                return {"message": "Data might be malform", "data": data}
+
             success = self.db_controller.insert_record(salary_record)
             
             if success:

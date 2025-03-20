@@ -20,15 +20,10 @@ class AppAPI:
         def submit_salary():
             try:
                 data = request.get_json()
-                company = self._create_company(data.get("company"))
-                if not company.validate():
-                    return jsonify({"error": "Invalid company data"}), 400
-                record = self._create_salary_record(data.get("record"), company)
-                if not record.validate():
-                    return jsonify({"error": "Invalid salary record"}), 400
-                if self._db.insert_record(record):
-                    return jsonify({"id": record.entity_id}), 201
-                return jsonify({"error": "Failed to save record"}), 500
+                response = self._service.submit_salary(data)
+                if response.get("error"):
+                    return jsonify(response), 500
+                return jsonify(response), 201
             except ValueError as e:
                 return jsonify({"error": str(e)}), 400
             except Exception as e:
