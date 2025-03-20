@@ -57,8 +57,7 @@ class DatabaseController(IDatabaseController):
             CREATE TABLE IF NOT EXISTS salaries (
                 id INTEGER PRIMARY KEY,
                 company_hash TEXT NOT NULL,
-                years_at_company INTEGER CHECK(years_at_company >= 0),
-                total_experience INTEGER CHECK(total_experience >= 0),
+                experience_level TEXT CHECK(experience_level IN ({experience_levels})),
                 salary_amount REAL CHECK(salary_amount > 0),
                 gender TEXT CHECK(gender IN ({genders})),
                 submission_date TEXT NOT NULL,
@@ -68,6 +67,7 @@ class DatabaseController(IDatabaseController):
                 FOREIGN KEY(company_hash) REFERENCES companies(hash)
             )
         '''.format(
+            experience_levels=", ".join(f"'{level.value}'" for level in ExperienceLevel),
             genders=", ".join(f"'{gender.value}'" for gender in Gender),
             departments=", ".join(f"'{department.value}'" for department in Department)
         ))
@@ -94,20 +94,19 @@ class DatabaseController(IDatabaseController):
         cursor.execute(
             """
             INSERT INTO salaries (
-                id, company_hash, years_at_company, total_experience, salary_amount, gender, 
+                id, company_hash, experience_level, salary_amount, gender, 
                 submission_date, is_well_compensated, department, job_title
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 record.id,
                 record.company_hash,
-                record.years_at_company,
-                record.total_experience,
+                record.experience_level.value,
                 record.salary_amount,
                 record.gender.value,
                 record.submission_date,
                 record.is_well_compensated,
-                record.department,
+                record.department.value,
                 record.job_title,
             )
         )

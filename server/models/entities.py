@@ -58,8 +58,7 @@ class Company(BaseEntity):
         return hashlib.sha256(hash_input).hexdigest()
 
 class SalaryRecord(BaseEntity):
-    def __init__(self, company: Company, years_at_company: int, 
-                 total_experience: int, salary_amount: float, gender: Gender,
+    def __init__(self, company: Company, experience_level: ExperienceLevel, salary_amount: float, gender: Gender,
                  submission_date: str, is_well_compensated: bool, 
                  department: Department, job_title: str):
         
@@ -67,8 +66,7 @@ class SalaryRecord(BaseEntity):
             raise TypeError("company must be an instance of Company")
 
         self._company = company
-        self._years_at_company = max(0, years_at_company)
-        self._total_experience = max(0, total_experience)
+        self._experience_level = experience_level
         self._salary_amount = max(0.01, salary_amount)
         self._gender = gender
         self._submission_date = submission_date.strip()
@@ -103,12 +101,8 @@ class SalaryRecord(BaseEntity):
         return self._company.generate_hash()
 
     @property
-    def years_at_company(self):
-        return self._years_at_company
-
-    @property
-    def total_experience(self):
-        return self._total_experience
+    def experience_level(self):
+        return self._experience_level
 
     @property
     def salary_amount(self):

@@ -38,8 +38,7 @@ class SalaryService(ISalaryService):
 
             salary_record = SalaryRecord(
                 company=company,
-                years_at_company=data.get("years_at_company", 0),
-                total_experience=data.get("total_experience", 0),
+                experience_level=self.enum_converter.merge_experience(data.get("years_at_the_company"), data.get("total_experience")),
                 salary_amount=data.get("salary_amount", 0.0),
                 gender=self.enum_converter.str_to_gender(data.get("gender", "Not specified")),
                 submission_date=data.get("submission_date"),
