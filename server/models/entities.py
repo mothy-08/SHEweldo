@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 import hashlib
+import os
 from server.models.enums import *
 
 class BaseEntity(ABC):
@@ -15,12 +16,14 @@ class BaseEntity(ABC):
         pass
 
 class Company(BaseEntity):
-    def __init__(self, entity_id: str, name: str, size: CompanySize, industry: Industry, country: str):
-        super().__init__(entity_id)
+    def __init__(self, name: str, size: CompanySize, industry: Industry, country: str):
         self._name = name.strip()
         self._size = size
         self._industry = industry
         self._country = country.strip()
+
+        entity_id = self.generate_hash()
+        super().__init__(entity_id)
 
     def validate(self) -> bool:
         return all([
@@ -29,6 +32,10 @@ class Company(BaseEntity):
             isinstance(self._industry, Industry),
             len(self._country) > 0
         ])
+    
+    @property
+    def id(self):
+        return self._entity_id
 
     @property
     def name(self):
@@ -47,7 +54,7 @@ class Company(BaseEntity):
         return self._industry
 
     def generate_hash(self) -> str:
-        hash_input = f"{self.name}{self.country}".encode()
+        hash_input = f"{self.name.lower()}{self.country.lower()}".encode()
         return hashlib.sha256(hash_input).hexdigest()
 
 class SalaryRecord(BaseEntity):

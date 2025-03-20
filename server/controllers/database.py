@@ -95,6 +95,24 @@ class DatabaseController(IDatabaseController):
         )
         self._connection.commit()
         return True
+    
+    def insert_company(self, company: Company) -> bool:
+        cursor = self._connection.cursor()
+        cursor.execute(
+            """
+            INSERT INTO companies (
+                hash, name, size, industry, country
+            ) VALUES (?, ?, ?, ?, ?)
+            """,
+            (
+                company.id,
+                company.name,
+                company.size.value,
+                company.industry.value,
+                company.country,
+            )
+        )
+
 
     def get_records(self, filters: FilterParams) -> list[SalaryRecord]:
         allowed_filters = {"company_hash", "position"}
