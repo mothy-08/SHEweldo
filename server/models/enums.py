@@ -43,6 +43,14 @@ class Gender(StrEnum):
     NONBINARY = auto()
     OTHER = auto()
 
+class ExperienceLevel(StrEnum):
+    ENTRY_LEVEL = auto()
+    JUNIOR = auto()
+    MID_LEVEL = auto()
+    SENIOR = auto()
+    EXPERT = auto()
+    LEGENDARY = auto()
+
 class EnumConverter:
     def _str_to_enum(self, enum_cls: type[StrEnum], value_str: str, default: StrEnum) -> StrEnum:
         """Converts a string to an enum value, with a fallback default."""
@@ -59,6 +67,22 @@ class EnumConverter:
         if employee_count <= 400:
             return CompanySize.LARGE
         return CompanySize.ENTERPRISE
+    
+    @staticmethod
+    def merge_experience(years_at_company: int, total_experience: int) -> ExperienceLevel:
+        weighted_experience = (years_at_company * 1.5) + total_experience
+        if weighted_experience < 2:
+            return ExperienceLevel.ENTRY_LEVEL
+        elif weighted_experience < 5:
+            return ExperienceLevel.JUNIOR
+        elif weighted_experience < 9:
+            return ExperienceLevel.MID_LEVEL
+        elif weighted_experience < 14:
+            return ExperienceLevel.SENIOR
+        elif weighted_experience < 20:
+            return ExperienceLevel.EXPERT
+        else:
+            return ExperienceLevel.LEGENDARY
 
     def str_to_industry(self, industry_str: str) -> Industry:
         return self._str_to_enum(Industry, industry_str, Industry.OTHER)
