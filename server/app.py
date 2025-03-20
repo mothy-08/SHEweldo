@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 from typing import Optional
 from datetime import date
 
@@ -13,6 +14,7 @@ class AppAPI:
         self._company_service = company_service
         self._db = db
         self._app = Flask(__name__)
+        CORS(self._app, resources={r"/api/*": {"origins": "*"}}) 
         self._setup_routes()
         self._configure_error_handlers()
 
