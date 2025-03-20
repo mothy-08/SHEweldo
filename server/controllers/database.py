@@ -82,6 +82,25 @@ class DatabaseController(IDatabaseController):
 
         self._connection.commit()
 
+    
+
+    def _build_where_clause_and_params(self, filters: FilterParams) -> tuple[str, List[Any]]:
+        where_clause = "WHERE 1=1"
+        params = []
+        if "company_hash" in filters:
+            where_clause += " AND company_hash = ?"
+            params.append(filters["company_hash"])
+        if "industry" in filters:
+            where_clause += " AND company_hash IN (SELECT hash FROM companies WHERE industry = ?)"
+            params.append(filters["industry"].value)
+        if "department" in filters:
+            where_clause += " AND department = ?"
+            params.append(filters["department"].value)
+        if "experience_level" in filters:
+            where_clause += " AND experience_level = ?"
+            params.append(filters["experience_level"].value)
+        return where_clause, params
+
 
     def get_company_record(self, hash_val: str) -> Optional[Company]:
         if not isinstance(hash_val, str):
@@ -150,26 +169,9 @@ class DatabaseController(IDatabaseController):
             print(f"SQLite Error: {e}")
             return False
 
-    def get_filtered_records(self, filters: FilterParams) -> list[SalaryRecord]:
-        query = "SELECT * FROM salaries WHERE 1=1"
-        params = []
-
-        if "company_hash" in filters:
-            query += " AND company_hash = ?"
-            params.append(filters["company_hash"])
-
-        if "industry" in filters:
-            query += " AND company_hash IN (SELECT hash FROM companies WHERE industry = ?)"
-            params.append(filters["industry"].value)
-
-        if "department" in filters:
-            query += " AND department = ?"
-            params.append(filters["department"].value)
-
-        if "experience_level" in filters:
-            query += " AND experience_level = ?"
-            params.append(filters["experience_level"].value)
-
+    def get_filtered_records(self, filters: FilterParams) -> List[SalaryRecord]:
+        where_clause, params = self._build_where_clause_and_params(filters)
+        query = f"SELECT * FROM salaries {where_clause}"
         cursor = self._connection.cursor()
         cursor.execute(query, tuple(params))
         rows = cursor.fetchall()
