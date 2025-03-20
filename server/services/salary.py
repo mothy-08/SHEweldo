@@ -7,6 +7,14 @@ from server.models.enums import *
 
 class ISalaryService(ABC):
     @abstractmethod
+    def submit_salary(self, data: Dict[str, Any]):
+        pass
+
+    @abstractmethod
+    def add_company(self, data: Dict[str, Any]):
+        pass
+
+    @abstractmethod
     def calculate_averages(self, department: Department) -> Dict[str, float]:
         pass
     
@@ -28,15 +36,8 @@ class SalaryService(ISalaryService):
 
     def submit_salary(self, data: Dict[str, Any]):
         try:
-            company = Company(
-                name=data.get("company"),
-                size=self.int_to_company_size(data.get("company_size")),
-                industry=self.str_to_industry(data.get("industry")),
-                country=data.get("country")
-            )
-
             salary_record = SalaryRecord(
-                company=company,
+                company_hash=data.get("company_hash"),
                 experience_level=self.merge_experience(data.get("years_at_the_company"), data.get("total_experience")),
                 salary_amount=data.get("salary_amount", 0.0),
                 gender=self.str_to_gender(data.get("gender", "Not specified")),
@@ -48,13 +49,39 @@ class SalaryService(ISalaryService):
 
             if not salary_record.validate():
                 return {"message": "Data might be malform", "data": data}
+            
+            print("before db")
+            
+            success = self.db_controller.insert_salary_record(salary_record)
 
-            success = self.db_controller.insert_record(salary_record)
+            print(success)
             
             if success:
                 return {"message": "Salary submitted successfully", "data": data}
             else:
                 return {"message": "Failed to submit salary", "error": "Database insertion failed"}, 500
+        except Exception as e:
+            return {"message": "An error occurred", "error": str(e)}, 500
+        
+    def add_company(self, data: Dict[str, Any]):
+        try:
+            company = Company(
+                name=data.get("company_name"),
+                size=self.int_to_company_size(int(data.get("company_size"))),
+                industry=self.str_to_industry(data.get("company_industry")),
+                country=data.get("country")
+            )
+
+            if not company.validate():
+                return {"message": "Company data might be malform", "data": data}
+            
+            success = self.db_controller.insert_company(company)
+
+            if success:
+                return {"message": "Company added successfully", "data": data}
+            else:
+                return {"message": "Failed to add company", "error": "Database insertion failed"}, 500
+            
         except Exception as e:
             return {"message": "An error occurred", "error": str(e)}, 500
         

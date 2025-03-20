@@ -16,11 +16,24 @@ class AppAPI:
         self._configure_error_handlers()
 
     def _setup_routes(self):
-        @self._app.route("/api/salaries", methods=["POST"])
+        @self._app.route("/api/salaries/submit", methods=["POST"])
         def submit_salary():
             try:
                 data = request.get_json()
                 response = self._service.submit_salary(data)
+                if response.get("error"):
+                    return jsonify(response), 500
+                return jsonify(response), 201
+            except ValueError as e:
+                return jsonify({"error": str(e)}), 400
+            except Exception as e:
+                return jsonify({"error": "Server error"}), 500
+            
+        @self._app.route("/api/companies/add", methods=["POST"])
+        def add_company():
+            try:
+                data = request.get_json()
+                response = self._service.add_company(data)
                 if response.get("error"):
                     return jsonify(response), 500
                 return jsonify(response), 201

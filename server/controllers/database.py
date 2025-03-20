@@ -4,28 +4,36 @@ from server.models.enums import *
 import sqlite3
 from typing import TypedDict, Optional
 
+class FilterParams(TypedDict, total=False):
+    company_hash: str
+    industry: Industry
+    department: Department
+    experience: ExperienceLevel
+
 class IDatabaseController(ABC):
     @abstractmethod
-    def get_company(self, hash_val: str) -> Optional[Company]:
+    def get_company_record(self, hash_val: str) -> Optional[Company]:
         pass
     
     @abstractmethod
-    def insert_record(self, record: SalaryRecord) -> bool:
+    def get_all_companies(self) -> list[tuple[str, str]]:
+        pass
+
+    @abstractmethod
+    def insert_salary_record(self, record: SalaryRecord) -> bool:
         pass
     
     @abstractmethod
-    def get_records(self, filters: dict[str, object]) -> list[SalaryRecord]:
+    def insert_company(self, company: Company) -> bool:
+        pass
+
+    @abstractmethod
+    def get_filtered_records(self, filters: FilterParams) -> list[SalaryRecord]:
         pass
 
     @abstractmethod
     def close(self) -> None:
         pass
-
-class FilterParams(TypedDict, total=False):
-    company_hash: str
-    industry: Industry
-    department: Department
-    # experience: int TODO: Create enum for experience
 
 class DatabaseController(IDatabaseController):
     def __init__(self, db_name="record.db"):
@@ -55,7 +63,7 @@ class DatabaseController(IDatabaseController):
 
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS salaries (
-                id INTEGER PRIMARY KEY,
+                id TEXT PRIMARY KEY,
                 company_hash TEXT NOT NULL,
                 experience_level TEXT CHECK(experience_level IN ({experience_levels})),
                 salary_amount REAL CHECK(salary_amount > 0),
@@ -96,7 +104,7 @@ class DatabaseController(IDatabaseController):
             INSERT INTO salaries (
                 id, company_hash, experience_level, salary_amount, gender, 
                 submission_date, is_well_compensated, department, job_title
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 record.id,
@@ -110,6 +118,7 @@ class DatabaseController(IDatabaseController):
                 record.job_title,
             )
         )
+        print("after")
         self._connection.commit()
         return True
     
@@ -129,6 +138,8 @@ class DatabaseController(IDatabaseController):
                 company.country,
             )
         )
+        self._connection.commit()
+        return True
 
     def get_filtered_records(self, filters: FilterParams) -> list[SalaryRecord]:
         query = "SELECT * FROM salaries WHERE 1=1"
@@ -146,12 +157,15 @@ class DatabaseController(IDatabaseController):
             query += " AND department = ?"
             params.append(filters["department"].value)
 
+        if "experience_level" in filters:
+            query += " AND experience_level = ?"  # Fixed extra `)`
+            params.append(filters["experience_level"].value)  # Corrected key
+
         cursor = self._connection.cursor()
         cursor.execute(query, tuple(params))
         rows = cursor.fetchall()
         
         return [SalaryRecord(*row) for row in rows]
-
 
     def close(self) -> None:
         if self._connection:

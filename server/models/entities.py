@@ -1,6 +1,5 @@
+import hashlib, os
 from abc import ABC, abstractmethod
-import hashlib
-import os
 from server.models.enums import *
 
 class BaseEntity(ABC):
@@ -58,14 +57,11 @@ class Company(BaseEntity):
         return hashlib.sha256(hash_input).hexdigest()
 
 class SalaryRecord(BaseEntity):
-    def __init__(self, company: Company, experience_level: ExperienceLevel, salary_amount: float, gender: Gender,
+    def __init__(self, company_hash: str, experience_level: ExperienceLevel, salary_amount: float, gender: Gender,
                  submission_date: str, is_well_compensated: bool, 
                  department: Department, job_title: str):
-        
-        if not isinstance(company, Company):
-            raise TypeError("company must be an instance of Company")
 
-        self._company = company
+        self._company_hash = company_hash
         self._experience_level = experience_level
         self._salary_amount = max(0.01, salary_amount)
         self._gender = gender
@@ -79,9 +75,8 @@ class SalaryRecord(BaseEntity):
 
     def validate(self) -> bool:
         return all([
-            self._company.validate(),
-            self._years_at_company >= 0,
-            self._total_experience >= 0,
+            len(self._company_hash) > 0,
+            isinstance(self.experience_level, ExperienceLevel),
             self._salary_amount > 0,
             isinstance(self._gender, Gender),
             isinstance(self._department, Department),
@@ -93,12 +88,8 @@ class SalaryRecord(BaseEntity):
         return self._entity_id
     
     @property
-    def company(self):
-        return self._company
-
-    @property
     def company_hash(self):
-        return self._company.generate_hash()
+        return self._company_hash
 
     @property
     def experience_level(self):
