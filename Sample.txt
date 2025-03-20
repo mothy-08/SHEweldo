@@ -1,0 +1,24 @@
+0.0.0.0:5000/api/salaries/submit
+{
+    "company_hash": "5826c9f674293243b1d27e79505afe66a0afdc48b6cd08c6105d8b848a8a0f95",
+    "years_at_the_company": 2,
+    "total_experience": 5,
+    "salary_amount": 100,
+    "gender": "Male",
+    "submission_date": "2024-03-20",
+    "is_well_compensated": true,
+    "department": "Engineering",
+    "job_title": "Senior Software Engineer"
+}
+
+0.0.0.0:5000/api/companies/add
+{
+    "company_name": "Meow",
+    "company_size": 1000,
+    "company_industry": "Technology",
+    "country": "Philippines"
+}
+
+0.0.0.0:5000/api/graphs?experience_level=senior
+0.0.0.0:5000/api/graphs?experience_level=junior
+0.0.0.0:5000/api/graphs?industry=TECH&department=ENG&experience_level=senior
