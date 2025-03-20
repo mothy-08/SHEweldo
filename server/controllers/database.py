@@ -98,48 +98,57 @@ class DatabaseController(IDatabaseController):
         return cursor.fetchall()
 
     def insert_salary_record(self, record: SalaryRecord) -> bool:
-        cursor = self._connection.cursor()
-        cursor.execute(
-            """
-            INSERT INTO salaries (
-                id, company_hash, experience_level, salary_amount, gender, 
-                submission_date, is_well_compensated, department, job_title
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """,
-            (
-                record.id,
-                record.company_hash,
-                record.experience_level.value,
-                record.salary_amount,
-                record.gender.value,
-                record.submission_date,
-                record.is_well_compensated,
-                record.department.value,
-                record.job_title,
+        try:
+            cursor = self._connection.cursor()
+            cursor.execute(
+                """
+                INSERT INTO salaries (
+                    id, company_hash, experience_level, salary_amount, gender, 
+                    submission_date, is_well_compensated, department, job_title
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    record.id,
+                    record.company_hash,
+                    record.experience_level.value,
+                    record.salary_amount,
+                    record.gender.value,
+                    record.submission_date,
+                    record.is_well_compensated,
+                    record.department.value,
+                    record.job_title,
+                )
             )
-        )
-        print("after")
-        self._connection.commit()
-        return True
+            self._connection.commit()
+            return True
+
+        except sqlite3.Error as e:
+            print(f"SQLite Error: {e}")
+            return False
     
     def insert_company(self, company: Company) -> bool:
-        cursor = self._connection.cursor()
-        cursor.execute(
-            """
-            INSERT INTO companies (
-                hash, name, size, industry, country
-            ) VALUES (?, ?, ?, ?, ?)
-            """,
-            (
-                company.id,
-                company.name,
-                company.size.value,
-                company.industry.value,
-                company.country,
+        try:
+            cursor = self._connection.cursor()
+            cursor.execute(
+                """
+                INSERT INTO companies (
+                    hash, name, size, industry, country
+                ) VALUES (?, ?, ?, ?, ?)
+                """,
+                (
+                    company.id,
+                    company.name,
+                    company.size.value,
+                    company.industry.value,
+                    company.country,
+                )
             )
-        )
-        self._connection.commit()
-        return True
+            self._connection.commit()
+            return True
+
+        except sqlite3.Error as e:
+            print(f"SQLite Error: {e}")
+            return False
 
     def get_filtered_records(self, filters: FilterParams) -> list[SalaryRecord]:
         query = "SELECT * FROM salaries WHERE 1=1"

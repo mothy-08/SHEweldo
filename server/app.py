@@ -4,12 +4,13 @@ from datetime import date
 
 from models.enums import CompanySize, Department, Gender
 from models.entities import Company, SalaryRecord
-from services.salary import ISalaryService
+from server.services import IService, SalaryService, CompanyService
 from controllers.database import IDatabaseController
 
 class AppAPI:
-    def __init__(self, service: ISalaryService, db: IDatabaseController):
-        self._service = service
+    def __init__(self,salary_service: IService, company_service: IService, db: IDatabaseController):
+        self._salary_service = salary_service
+        self._company_service = company_service
         self._db = db
         self._app = Flask(__name__)
         self._setup_routes()
@@ -20,7 +21,8 @@ class AppAPI:
         def submit_salary():
             try:
                 data = request.get_json()
-                response = self._service.submit_salary(data)
+                response = self._salary_service.add(data)
+                print(response)
                 if response.get("error"):
                     return jsonify(response), 500
                 return jsonify(response), 201
@@ -33,7 +35,7 @@ class AppAPI:
         def add_company():
             try:
                 data = request.get_json()
-                response = self._service.add_company(data)
+                response = self._company_service.add(data)
                 if response.get("error"):
                     return jsonify(response), 500
                 return jsonify(response), 201
@@ -122,11 +124,12 @@ class AppAPI:
         self._app.run(host=host, port=port, debug=debug)
 
 if __name__ == "__main__":
-    from services.salary import SalaryService
+    from server.services import SalaryService, CompanyService
     from controllers.database import DatabaseController
     
     db = DatabaseController()
-    service = SalaryService(db)
+    salary_service = SalaryService(db)
+    company_service = CompanyService(db)
     
-    api = AppAPI(service, db)
+    api = AppAPI(salary_service, company_service, db)
     api.run(debug=True)
