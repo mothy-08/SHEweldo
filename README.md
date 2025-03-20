@@ -1,10 +1,29 @@
-# SHEweldo 🚀
+<div align="center">
+   <img src="https://github.com/mothy-08/SHEweldo/blob/main/static/SHEweldo.png" width="420" height="150">
+   <h1>An Equal Pay Transparency Platform</h1>
+</div>
 
+<details>
+<summary><h2>🔎 Contents</h2></summary>
+
+- [Introduction](#introduction)
+- [Mission and Purpose](#mission)
+- [Core Features](#features)
+- [Target Users](#users)
+- [Member Portfolio](#members)
+- [Acknowledgement](#ack)
+
+</details>
+
+### <a name="introduction"></a>
+## 👧 Introduction
+<div align="justify">
 SHEweldo is an equal pay transparency platform dedicated to promoting wage equality and fair compensation practices for women. By combining user-reported salary data, publicly available company records, and government labor statistics, SHEweldo offers data-driven insights that empower individuals and organizations to bridge gender-based wage gaps and foster systemic change.
+</div>
+<br>
 
----
-
-## Mission & Purpose 🎯
+### <a name="mission"></a>
+## 🎯 Mission & Purpose 
 
 **SHEweldo** derives its name from the combination of “SHE” and “weldo.”  
 - **SHE:** Highlights the platform's focus on advocating for gender equity and economic empowerment for women. 👩‍💼  
@@ -16,10 +35,10 @@ Our mission is to:
 - Address patriarchal norms within the workplace 🏢
 - Equip users with the knowledge to advocate for fair pay 💪
 - Serve as a resource for employers, policymakers, and advocacy groups to implement equitable pay structures and drive systemic change 🌍
+<br>
 
----
-
-## Core Features 🔍
+### <a name="features"></a>
+## 🔍 Core Features 
 
 ### 1. Salary Data Collection 📝
 - **Employee-Submitted Salary Reports:**  
@@ -59,9 +78,10 @@ Our mission is to:
 - **Historical Salary Data Trends:**  
   Tracks the evolution of pay equity over time.
 
----
+<br>
 
-## Target Users 🎯
+### <a name="users"></a>
+## 👤 Target Users 
 
 SHEweldo is designed to serve a diverse range of users:
 
@@ -93,11 +113,60 @@ SHEweldo is designed to serve a diverse range of users:
 - **Corporate Social Responsibility (CSR) Teams:**  
   Use salary data to support initiatives on workplace fairness and inclusion.
 
----
+<br>
 
-## Collaborators 🤝
+### <a name="members"></a>
+## 🤝 Member Portfolio 
 
-1. [Alimagno, Timothy Dave C.](https://github.com/mothy-08)  
-2. [Banaag, Vince Clyde S.](https://github.com/mimikyow)  
-3. [Maranan, Deogenes Gregorio S.](https://github.com/DeogenesMaranan)  
-4. [Montoya, Ram Greggor D.](https://github.com/rmuuu)
+<div align="center">
+<table style="width: 100%; table-layout: auto;">
+  <tr>
+    <th style="width: 80px; text-align: center;">
+      <img src="https://github.com/mothy-08/SHEweldo/blob/main/static/Timothy.png" width="55%">
+    </th>
+    <td>
+      <div align="left"><strong>💡Alimagno, Timothy Dave C.</strong><br>
+        ➟ <a href="https://github.com/mothy-08">mothy-08</a><br>
+        ➟ 22-06373<br>
+      </div>
+    </td>
+  </tr>
+  <tr>
+    <th style="width: 80px; text-align: center;">
+      <img src="https://i.ibb.co/MZMmvPN/Passport-Picture-1-removebg-preview.png" width="55%">
+    </th>
+    <td>
+      <div align="left"><strong>💡Banaag, Vince Clyde S.</strong><br>
+        ➟ <a href="https://github.com/mimikyow">mimikyow</a><br>
+        ➟ 22-09658<br>
+      </div>
+    </td>
+  </tr>
+  <tr>
+    <th style="width: 80px; text-align: center;">
+      <img src="https://github.com/mothy-08/SHEweldo/blob/main/static/Deo.png" width="55%">
+    </th>
+    <td>
+      <div align="left"><strong>💡Maranan, Deogenes Gregorio S.</strong><br>
+        ➟ <a href="https://github.com/DeogenesMaranan">DeogenesMaranan</a><br>
+        ➟ 22-07432<br>
+      </div>
+    </td>
+  </tr>
+  <tr>
+    <th style="width: 80px; text-align: center;">
+      <img src="https://github.com/mothy-08/SHEweldo/blob/main/static/Ram.png" width="55%">
+    </th>
+    <td>
+      <div align="left"><strong>💡Montoya, Ram Greggor D.</strong><br>
+        ➟ <a href="https://github.com/rmuuu">rmuuu</a><br>
+        ➟ 22-07432<br>
+      </div>
+    </td>
+  </tr>
+</table>
+</div>
+<br>
+
+### <a name="ack"></a>
+## 🩷 Acknowledgement
