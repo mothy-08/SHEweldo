@@ -7,7 +7,7 @@ class BaseEntity(ABC):
         self._entity_id = entity_id
 
     @property
-    def entity_id(self):
+    def entity_id(self) -> str:
         return self._entity_id
     
     @abstractmethod
@@ -51,12 +51,11 @@ class Company(BaseEntity):
         return hashlib.sha256(hash_input).hexdigest()
 
 class SalaryRecord(BaseEntity):
-    def __init__(self, entity_id: str, company: Company, years_at_company: int, 
+    def __init__(self, company: Company, years_at_company: int, 
                  total_experience: int, salary_amount: float, gender: Gender,
                  submission_date: str, is_well_compensated: bool, 
                  department: Department, job_title: str):
-        super().__init__(entity_id)
-
+        
         if not isinstance(company, Company):
             raise TypeError("company must be an instance of Company")
 
@@ -70,6 +69,9 @@ class SalaryRecord(BaseEntity):
         self._department = department
         self._job_title = job_title.strip()
 
+        entity_id = self.generate_hash()
+        super().__init__(entity_id)
+
     def validate(self) -> bool:
         return all([
             self._company.validate(),
@@ -81,6 +83,10 @@ class SalaryRecord(BaseEntity):
             len(self._job_title) > 0
         ])
 
+    @property
+    def id(self):
+        return self._entity_id
+    
     @property
     def company(self):
         return self._company
@@ -120,3 +126,8 @@ class SalaryRecord(BaseEntity):
     @property
     def job_title(self):
         return self._job_title
+
+    def generate_hash(self) -> str:
+        salt = os.urandom(16).hex()
+        hash_input = f"{self.company_hash}{self.salary_amount}{self.submission_date}{salt}".encode()
+        return hashlib.sha256(hash_input).hexdigest()

@@ -38,7 +38,7 @@ class DatabaseController(IDatabaseController):
         cursor = self._connection.cursor()
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS companies (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id INTEGER PRIMARY KEY,
                 hash TEXT UNIQUE,
                 name TEXT,
                 size TEXT,
@@ -72,7 +72,7 @@ class DatabaseController(IDatabaseController):
         row = cursor.fetchone()
         return Company(*row) if row else None
 
-    def insert_record(self, record: SalaryRecord) -> bool:
+    def insert_salary_record(self, record: SalaryRecord) -> bool:
         cursor = self._connection.cursor()
         cursor.execute(
             """
