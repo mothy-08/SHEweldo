@@ -70,6 +70,7 @@ class EnumConverter:
     
     @staticmethod
     def merge_experience(years_at_company: int, total_experience: int) -> ExperienceLevel:
+        """Calculates weighted experience and returns an ExperienceLevel enum."""
         weighted_experience = (years_at_company * 1.5) + total_experience
         if weighted_experience < 2:
             return ExperienceLevel.ENTRY_LEVEL
