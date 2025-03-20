@@ -50,11 +50,7 @@ class SalaryService(ISalaryService):
             if not salary_record.validate():
                 return {"message": "Data might be malform", "data": data}
             
-            print("before db")
-            
             success = self.db_controller.insert_salary_record(salary_record)
-
-            print(success)
             
             if success:
                 return {"message": "Salary submitted successfully", "data": data}
