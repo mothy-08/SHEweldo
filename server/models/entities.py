@@ -1,45 +1,52 @@
 from abc import ABC, abstractmethod
 import hashlib
-
 from server.models.enums import *
 
 class BaseEntity(ABC):
     def __init__(self, entity_id: str):
-        self.__entity_id = entity_id
-        
+        self._entity_id = entity_id
+
     @property
     def entity_id(self):
-        return self.__entity_id
+        return self._entity_id
     
     @abstractmethod
     def validate(self) -> bool:
         pass
 
 class Company(BaseEntity):
-    def __init__(self, entity_id: str, name: str, size: CompanySize, industry: str, country: str):
+    def __init__(self, entity_id: str, name: str, size: CompanySize, industry: Industry, country: str):
         super().__init__(entity_id)
-        self.__name = name
-        self.__size = size
-        self.__industry = industry
-        self.__country = country
+        self._name = name.strip()
+        self._size = size
+        self._industry = industry
+        self._country = country.strip()
 
     def validate(self) -> bool:
         return all([
-            isinstance(self.__size, CompanySize),
-            len(self.__name.strip()) > 0,
-            isinstance(self.__industry, Industry),
-            len(self.__country.strip()) > 0
+            isinstance(self._size, CompanySize),
+            len(self._name) > 0,
+            isinstance(self._industry, Industry),
+            len(self._country) > 0
         ])
 
     @property
     def name(self):
-        return self.__name
+        return self._name
 
     @property
     def country(self):
-        return self.__country
+        return self._country
 
-    def generate_hash(self):
+    @property
+    def size(self):
+        return self._size
+
+    @property
+    def industry(self):
+        return self._industry
+
+    def generate_hash(self) -> str:
         hash_input = f"{self.name}{self.country}".encode()
         return hashlib.sha256(hash_input).hexdigest()
 
@@ -49,66 +56,67 @@ class SalaryRecord(BaseEntity):
                  submission_date: str, is_well_compensated: bool, 
                  department: Department, job_title: str):
         super().__init__(entity_id)
+
         if not isinstance(company, Company):
             raise TypeError("company must be an instance of Company")
-            
-        self.__company = company
-        self.__years_at_company = years_at_company
-        self.__total_experience = total_experience
-        self.__salary_amount = salary_amount
-        self.__gender = gender
-        self.__submission_date = submission_date
-        self.__is_well_compensated = is_well_compensated
-        self.__department = department
-        self.__job_title = job_title
+
+        self._company = company
+        self._years_at_company = max(0, years_at_company)
+        self._total_experience = max(0, total_experience)
+        self._salary_amount = max(0.01, salary_amount)
+        self._gender = gender
+        self._submission_date = submission_date.strip()
+        self._is_well_compensated = is_well_compensated
+        self._department = department
+        self._job_title = job_title.strip()
 
     def validate(self) -> bool:
         return all([
-            self.__company.validate(),
-            self.__years_at_company >= 0,
-            self.__total_experience >= 0,
-            self.__salary_amount > 0,
-            isinstance(self.__gender, Gender),
-            isinstance(self.__department, Department),
-            len(self.__job_title.strip()) > 0
+            self._company.validate(),
+            self._years_at_company >= 0,
+            self._total_experience >= 0,
+            self._salary_amount > 0,
+            isinstance(self._gender, Gender),
+            isinstance(self._department, Department),
+            len(self._job_title) > 0
         ])
 
     @property
     def company(self):
-        return self.__company
+        return self._company
 
     @property
     def company_hash(self):
-        return self.__company.generate_hash()
+        return self._company.generate_hash()
 
     @property
     def years_at_company(self):
-        return self.__years_at_company
+        return self._years_at_company
 
     @property
     def total_experience(self):
-        return self.__total_experience
+        return self._total_experience
 
     @property
     def salary_amount(self):
-        return self.__salary_amount
+        return self._salary_amount
 
     @property
     def gender(self):
-        return self.__gender
+        return self._gender
 
     @property
     def submission_date(self):
-        return self.__submission_date
+        return self._submission_date
 
     @property
     def is_well_compensated(self):
-        return self.__is_well_compensated
+        return self._is_well_compensated
 
     @property
     def department(self):
-        return self.__department
+        return self._department
 
     @property
     def job_title(self):
-        return self.__job_title
+        return self._job_title
