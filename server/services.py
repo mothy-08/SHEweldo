@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Dict, Any, Optional, Type
 
 from server.models.entities import SalaryRecord, Company
-from server.controllers.database import DatabaseController
+from server.controllers.database import DatabaseController, FilterParams
 from server.models.enums import *
 
 class IService(ABC):
@@ -27,6 +27,12 @@ class IService(ABC):
             
         normalized = value_str.strip().upper().replace(" ", "_")
         return next((e for e in enum_cls if e.name == normalized), default)
+    
+    def fetch_filtered_records(self, filters: FilterParams, salary_range_step: int):
+        bargraph_data = self.db_controller.get_bar_graph_data(filters, salary_range_step)
+        piegraph_data = self.db_controller.get_pie_graph_data(filters)
+
+        return bargraph_data, piegraph_data
     
     @abstractmethod
     def add(self, data: Dict[str, Any]) -> tuple[Dict[str, Any], int]:
