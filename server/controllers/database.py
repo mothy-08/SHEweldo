@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from server.models.entities import SalaryRecord, Company
 from server.models.enums import *
 import sqlite3
-from typing import TypedDict, Optional
+from typing import Any, Dict, List, TypedDict, Optional
 
 class FilterParams(TypedDict, total=False):
     company_hash: str
@@ -175,8 +175,35 @@ class DatabaseController(IDatabaseController):
         cursor = self._connection.cursor()
         cursor.execute(query, tuple(params))
         rows = cursor.fetchall()
-        
         return [SalaryRecord(*row) for row in rows]
+
+    def get_bar_graph_data(self, filters: FilterParams, range_step: int) -> list[dict]:
+        where_clause, where_params = self._build_where_clause_and_params(filters)
+        query = f"""
+            SELECT FLOOR(salary_amount / ?) * ? AS range_start, COUNT(*) AS count
+            FROM salaries
+            {where_clause}
+            GROUP BY range_start
+            ORDER BY range_start DESC
+        """
+        params = [range_step, range_step] + where_params
+        cursor = self._connection.cursor()
+        cursor.execute(query, tuple(params))
+        rows = cursor.fetchall()
+        return [{"range_start": row[0], "count": row[1]} for row in rows]
+
+    def get_pie_graph_data(self, filters: FilterParams) -> List[Dict[str, Any]]:
+        where_clause, where_params = self._build_where_clause_and_params(filters)
+        query = f"""
+            SELECT is_well_compensated, COUNT(*) AS count
+            FROM salaries
+            {where_clause}
+            GROUP BY is_well_compensated
+        """
+        cursor = self._connection.cursor()
+        cursor.execute(query, tuple(where_params))
+        rows = cursor.fetchall()
+        return [{"is_well_compensated": row[0], "count": row[1]} for row in rows]
 
     def close(self) -> None:
         if self._connection:
