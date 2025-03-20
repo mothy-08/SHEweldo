@@ -2,10 +2,10 @@ from flask import Flask, request, jsonify
 from typing import Optional
 from datetime import date
 
-from models.enums import CompanySize, Department, Gender
+from models.enums import CompanySize, Department, ExperienceLevel, Gender, Industry
 from models.entities import Company, SalaryRecord
 from server.services import IService, SalaryService, CompanyService
-from controllers.database import IDatabaseController
+from controllers.database import FilterParams, IDatabaseController
 
 class AppAPI:
     def __init__(self,salary_service: IService, company_service: IService, db: IDatabaseController):
@@ -22,7 +22,6 @@ class AppAPI:
             try:
                 data = request.get_json()
                 response = self._salary_service.add(data)
-                print(response)
                 if response.get("error"):
                     return jsonify(response), 500
                 return jsonify(response), 201
@@ -43,6 +42,33 @@ class AppAPI:
                 return jsonify({"error": str(e)}), 400
             except Exception as e:
                 return jsonify({"error": "Server error"}), 500
+            
+        @self._app.route("/api/graphs", methods=["GET"])
+        def get_graphs():
+            try:
+                filters = FilterParams()
+
+                if 'company_hash' in request.args:
+                    filters["company_hash"] = request.args.get("company_hash")
+
+                if 'industry' in request.args:
+                    filters["industry"] = Industry(request.args.get("industry"))
+
+                if 'department' in request.args:
+                    filters["department"] = Department(request.args.get("department"))
+
+                if 'experience_level' in request.args:
+                    filters["experience_level"] = ExperienceLevel(request.args.get("experience_level"))
+
+                bargraph_data, piegraph_data = self._salary_service.fetch_filtered_records(filters, 1000)
+
+                return jsonify({
+                    "bar_graph": bargraph_data,
+                    "pie_graph": piegraph_data
+                }), 200
+
+            except Exception as e:
+                return jsonify({"error": str(e)}), 500
 
         @self._app.route("/api/salaries/averages", methods=["GET"])
         def get_averages():
