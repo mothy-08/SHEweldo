@@ -3,7 +3,7 @@ from typing import Dict, Any
 
 from server.models.entities import SalaryRecord, Company
 from server.controllers.database import DatabaseController
-from server.models.enums import Department, EnumConverter
+from server.models.enums import *
 
 class ISalaryService(ABC):
     @abstractmethod
@@ -25,25 +25,24 @@ class ISalaryService(ABC):
 class SalaryService(ISalaryService):
     def __init__(self, db_controller: DatabaseController):
         self.db_controller = db_controller
-        self.enum_converter = EnumConverter
 
     def submit_salary(self, data: Dict[str, Any]):
         try:
             company = Company(
                 name=data.get("company"),
-                size=self.enum_converter.int_to_company_size(data.get("company_size")),
-                industry=self.enum_converter.str_to_industry(data.get("industry")),
+                size=self.int_to_company_size(data.get("company_size")),
+                industry=self.str_to_industry(data.get("industry")),
                 country=data.get("country")
             )
 
             salary_record = SalaryRecord(
                 company=company,
-                experience_level=self.enum_converter.merge_experience(data.get("years_at_the_company"), data.get("total_experience")),
+                experience_level=self.merge_experience(data.get("years_at_the_company"), data.get("total_experience")),
                 salary_amount=data.get("salary_amount", 0.0),
-                gender=self.enum_converter.str_to_gender(data.get("gender", "Not specified")),
+                gender=self.str_to_gender(data.get("gender", "Not specified")),
                 submission_date=data.get("submission_date"),
                 is_well_compensated=data.get("is_well_compensated", False),
-                department=self.enum_converter.str_to_department(data.get("department")),
+                department=self.str_to_department(data.get("department")),
                 job_title=data.get("job_title")
             )
 
@@ -55,6 +54,48 @@ class SalaryService(ISalaryService):
                 return {"message": "Failed to submit salary", "error": "Database insertion failed"}, 500
         except Exception as e:
             return {"message": "An error occurred", "error": str(e)}, 500
+        
+    def _str_to_enum(self, enum_cls: type[StrEnum], value_str: str, default: StrEnum) -> StrEnum:
+        """Converts a string to an enum value, with a fallback default."""
+        normalized_str = value_str.upper().replace(" ", "_")
+        return next((e for e in enum_cls if e.value == normalized_str), default)
+
+    @staticmethod
+    def int_to_company_size(employee_count: int) -> CompanySize:
+        """Converts an employee count to a CompanySize enum."""
+        if employee_count <= 50:
+            return CompanySize.SMALL
+        if employee_count <= 200:
+            return CompanySize.MEDIUM
+        if employee_count <= 400:
+            return CompanySize.LARGE
+        return CompanySize.ENTERPRISE
+    
+    @staticmethod
+    def merge_experience(years_at_company: int, total_experience: int) -> ExperienceLevel:
+        """Calculates weighted experience and returns an ExperienceLevel enum."""
+        weighted_experience = (years_at_company * 1.5) + total_experience
+        if weighted_experience < 2:
+            return ExperienceLevel.ENTRY_LEVEL
+        elif weighted_experience < 5:
+            return ExperienceLevel.JUNIOR
+        elif weighted_experience < 9:
+            return ExperienceLevel.MID_LEVEL
+        elif weighted_experience < 14:
+            return ExperienceLevel.SENIOR
+        elif weighted_experience < 20:
+            return ExperienceLevel.EXPERT
+        else:
+            return ExperienceLevel.LEGENDARY
+
+    def str_to_industry(self, industry_str: str) -> Industry:
+        return self._str_to_enum(Industry, industry_str, Industry.OTHER)
+
+    def str_to_gender(self, gender_str: str) -> Gender:
+        return self._str_to_enum(Gender, gender_str, Gender.OTHER)
+
+    def str_to_department(self, department_str: str) -> Department:
+        return self._str_to_enum(Department, department_str, Department.OTHER)
 
     def calculate_averages(self, department: Department) -> Dict[str, float]:
         # TODO: Implement database query to get salary averages by department
