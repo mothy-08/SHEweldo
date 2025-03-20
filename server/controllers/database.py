@@ -158,8 +158,8 @@ class DatabaseController(IDatabaseController):
             params.append(filters["department"].value)
 
         if "experience_level" in filters:
-            query += " AND experience_level = ?"  # Fixed extra `)`
-            params.append(filters["experience_level"].value)  # Corrected key
+            query += " AND experience_level = ?"
+            params.append(filters["experience_level"].value)
 
         cursor = self._connection.cursor()
         cursor.execute(query, tuple(params))

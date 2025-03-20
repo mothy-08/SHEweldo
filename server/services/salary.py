@@ -83,8 +83,9 @@ class SalaryService(ISalaryService):
         
     def _str_to_enum(self, enum_cls: type[StrEnum], value_str: str, default: StrEnum) -> StrEnum:
         """Converts a string to an enum value, with a fallback default."""
-        normalized_str = value_str.upper().replace(" ", "_")
-        return next((e for e in enum_cls if e.value == normalized_str), default)
+        normalized_str = value_str.strip().upper().replace(" ", "_")
+        return next((e for e in enum_cls if e.name == normalized_str), default)
+
 
     @staticmethod
     def int_to_company_size(employee_count: int) -> CompanySize:
