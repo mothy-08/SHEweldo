@@ -52,13 +52,13 @@ class AppAPI:
                     filters["company_hash"] = request.args.get("company_hash")
 
                 if 'industry' in request.args:
-                    filters["industry"] = Industry(request.args.get("industry"))
+                    filters["industry"] = Industry(request.args.get("industry").lower())
 
                 if 'department' in request.args:
-                    filters["department"] = Department(request.args.get("department"))
+                    filters["department"] = Department(request.args.get("department").lower())
 
                 if 'experience_level' in request.args:
-                    filters["experience_level"] = ExperienceLevel(request.args.get("experience_level"))
+                    filters["experience_level"] = ExperienceLevel(request.args.get("experience_level").lower())
 
                 bargraph_data, piegraph_data = self._salary_service.fetch_filtered_records(filters, 1000)
 
