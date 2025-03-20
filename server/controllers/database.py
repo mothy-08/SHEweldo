@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from server.models.entities import SalaryRecord, Company
+from server.models.enums import *
 import sqlite3
 from typing import TypedDict, Optional
 
@@ -22,7 +23,9 @@ class IDatabaseController(ABC):
 
 class FilterParams(TypedDict, total=False):
     company_hash: str
-    position: str
+    industry: Industry
+    department: Department
+    # experience: int TODO: Create enum for experience
 
 class DatabaseController(IDatabaseController):
     def __init__(self, db_name="record.db"):
@@ -40,30 +43,39 @@ class DatabaseController(IDatabaseController):
             CREATE TABLE IF NOT EXISTS companies (
                 id INTEGER PRIMARY KEY,
                 hash TEXT UNIQUE,
-                name TEXT,
-                size TEXT,
-                industry TEXT,
-                country TEXT
+                name TEXT NOT NULL,
+                size TEXT CHECK(size IN ({sizes})),
+                industry TEXT CHECK(industry IN ({industries})),
+                country TEXT NOT NULL
             )
-        ''')
+        '''.format(
+            sizes=", ".join(f"'{size.value}'" for size in CompanySize),
+            industries=", ".join(f"'{industry.value}'" for industry in Industry)
+        ))
+
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS salaries (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                company_hash TEXT,
-                years_at_company INTEGER,
-                total_experience INTEGER,
-                salary_amount REAL,
-                gender TEXT,
-                submission_date TEXT,
-                is_well_compensated BOOLEAN,
-                department TEXT,
-                job_title TEXT,
+                id INTEGER PRIMARY KEY,
+                company_hash TEXT NOT NULL,
+                years_at_company INTEGER CHECK(years_at_company >= 0),
+                total_experience INTEGER CHECK(total_experience >= 0),
+                salary_amount REAL CHECK(salary_amount > 0),
+                gender TEXT CHECK(gender IN ({genders})),
+                submission_date TEXT NOT NULL,
+                is_well_compensated BOOLEAN NOT NULL,
+                department TEXT CHECK(department IN ({departments})),
+                job_title TEXT NOT NULL,
                 FOREIGN KEY(company_hash) REFERENCES companies(hash)
             )
-        ''')
+        '''.format(
+            genders=", ".join(f"'{gender.value}'" for gender in Gender),
+            departments=", ".join(f"'{department.value}'" for department in Department)
+        ))
+
         self._connection.commit()
 
-    def get_company(self, hash_val: str) -> Optional[Company]:
+
+    def get_company_record(self, hash_val: str) -> Optional[Company]:
         if not isinstance(hash_val, str):
             raise ValueError("Invalid input: company hash must be a string")
 
@@ -71,26 +83,32 @@ class DatabaseController(IDatabaseController):
         cursor.execute("SELECT * FROM companies WHERE hash = ?", (hash_val,))
         row = cursor.fetchone()
         return Company(*row) if row else None
+    
+    def get_all_companies(self) -> list[tuple[str, str]]:
+        cursor = self._connection.cursor()
+        cursor.execute("SELECT name, hash FROM companies")
+        return cursor.fetchall()
 
     def insert_salary_record(self, record: SalaryRecord) -> bool:
         cursor = self._connection.cursor()
         cursor.execute(
             """
             INSERT INTO salaries (
-                company_hash, years_at_company, total_experience, salary_amount, gender, 
+                id, company_hash, years_at_company, total_experience, salary_amount, gender, 
                 submission_date, is_well_compensated, department, job_title
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
-                record.get_company_hash(),
-                record.get_years_at_company(),
-                record.get_total_experience(),
-                record.get_salary_amount(),
-                record.get_gender(),
-                record.get_submission_date(),
-                record.get_is_well_compensated(),
-                record.get_department(),
-                record.get_job_title(),
+                record.id,
+                record.company_hash,
+                record.years_at_company,
+                record.total_experience,
+                record.salary_amount,
+                record.gender.value,
+                record.submission_date,
+                record.is_well_compensated,
+                record.department,
+                record.job_title,
             )
         )
         self._connection.commit()
@@ -113,33 +131,28 @@ class DatabaseController(IDatabaseController):
             )
         )
 
-
-    def get_records(self, filters: FilterParams) -> list[SalaryRecord]:
-        allowed_filters = {"company_hash", "position"}
+    def get_filtered_records(self, filters: FilterParams) -> list[SalaryRecord]:
         query = "SELECT * FROM salaries WHERE 1=1"
         params = []
 
-        for key in filters.keys():
-            if key not in allowed_filters:
-                raise ValueError(f"Invalid filter key: {key}")
-
         if "company_hash" in filters:
-            if not isinstance(filters["company_hash"], str):
-                raise ValueError("Invalid input: company_hash must be a string")
             query += " AND company_hash = ?"
             params.append(filters["company_hash"])
 
-        if "position" in filters:
-            if not isinstance(filters["position"], str):
-                raise ValueError("Invalid input: position must be a string")
-            query += " AND job_title = ?"
-            params.append(filters["position"])
+        if "industry" in filters:
+            query += " AND company_hash IN (SELECT hash FROM companies WHERE industry = ?)"
+            params.append(filters["industry"].value)
+
+        if "department" in filters:
+            query += " AND department = ?"
+            params.append(filters["department"].value)
 
         cursor = self._connection.cursor()
         cursor.execute(query, tuple(params))
         rows = cursor.fetchall()
         
         return [SalaryRecord(*row) for row in rows]
+
 
     def close(self) -> None:
         if self._connection:
