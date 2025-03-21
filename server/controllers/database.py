@@ -64,16 +64,7 @@ class DatabaseController(IDatabaseController):
             return False
 
     def get_filtered_records(self, filters: FilterParams) -> List[SalaryRecord]:
-        query = {}
-        if "company_hash" in filters:
-            query["company_hash"] = filters["company_hash"]
-        if "industry" in filters:
-            query["industry"] = filters["industry"].value
-        if "department" in filters:
-            query["department"] = filters["department"].value
-        if "experience_level" in filters:
-            query["experience_level"] = filters["experience_level"].value
-        
+        query = self._build_query(filters)
         results = self._db.salaries.find(query)
         return [SalaryRecord(**record) for record in results]
 
