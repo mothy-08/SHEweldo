@@ -1,3 +1,4 @@
+import math
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from typing import Optional
@@ -14,7 +15,7 @@ class AppAPI:
         self._company_service = company_service
         self._db = db
         self._app = Flask(__name__)
-        CORS(self._app, resources={r"/api/*": {"origins": "http://localhost:5500"}})
+        CORS(self._app, resources={r"/api/*": {"origins": "*"}}) 
         self._setup_routes()
         self._configure_error_handlers()
 
@@ -45,28 +46,32 @@ class AppAPI:
             except Exception as e:
                 return jsonify({"error": "Server error"}), 500
             
-        @self._app.route("/api/graphs", methods=["GET"])
+        @self._app.route("/api/graphs/employee", methods=["GET"])
         def get_graphs():
             try:
-                filters = FilterParams()
+                zoom = 1000
+                filters: FilterParams = {}
+                salary_id = request.cookies.get('salary_id')
+                raw_salary = float(request.cookies.get('salary_amount'))
+                salary_amount = math.floor(raw_salary / zoom) * zoom
 
                 if 'company_hash' in request.args:
                     filters["company_hash"] = request.args.get("company_hash")
-
-                if 'industry' in request.args:
-                    filters["industry"] = Industry(request.args.get("industry").lower())
 
                 if 'department' in request.args:
                     filters["department"] = Department(request.args.get("department").lower())
 
                 if 'experience_level' in request.args:
                     filters["experience_level"] = ExperienceLevel(request.args.get("experience_level").lower())
-
-                bargraph_data, piegraph_data = self._salary_service.fetch_filtered_records(filters, 1000)
-
+                
+                if not filters:
+                    bargraph_data, piegraph_data = self._salary_service.fetch_filtered_records(zoom, salary_id)
+                else:
+                    bargraph_data, piegraph_data = self._salary_service.fetch_filtered_records(filters, zoom)
                 return jsonify({
                     "bar_graph": bargraph_data,
-                    "pie_graph": piegraph_data
+                    "pie_graph": piegraph_data,
+                    "current": salary_amount
                 }), 200
 
             except Exception as e:

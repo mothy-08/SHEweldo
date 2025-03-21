@@ -28,6 +28,10 @@ class IDatabaseController(ABC):
         pass
 
     @abstractmethod
+    def get_salary_record(self, salary_id: str) -> Optional[SalaryRecord]:
+        pass
+
+    @abstractmethod
     def get_filtered_records(self, filters: FilterParams) -> list[SalaryRecord]:
         pass
 
@@ -115,6 +119,19 @@ class DatabaseController(IDatabaseController):
         cursor = self._connection.cursor()
         cursor.execute("SELECT name, hash FROM companies")
         return cursor.fetchall()
+    
+    def get_salary_record(self, salary_id: str) -> Optional[SalaryRecord]:
+        if not isinstance(salary_id, str):
+            raise ValueError("Invalid input: salary_id must be a string")
+        
+        cursor = self._connection.cursor()
+        cursor.execute("SELECT * FROM salaries WHERE id = ?", (salary_id,))
+        row = cursor.fetchone()
+        if row is not None:
+            reordered_row = row[1:] + (row[0],)
+            return SalaryRecord(*reordered_row)
+        else:
+            return None 
 
     def insert_salary_record(self, record: SalaryRecord) -> bool:
         try:
