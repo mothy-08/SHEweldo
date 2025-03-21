@@ -77,8 +77,8 @@
                 if (response.ok) {
                     const date = new Date();
                     date.setFullYear(date.getFullYear() + 10);
-                    document.cookie = `salary_id=${result.id}; path=/; expires=${date.toUTCString()}`;
-                    document.cookie = `salary_amount=${result.salary}; path=/; expires=${date.toUTCString()}`;
+                    document.cookie = `salary_id=${result.id}; path=/; expires=${date.toUTCString()}; SameSite=None; Secure`;
+                    document.cookie = `salary_amount=${result.salary}; path=/; expires=${date.toUTCString()}; SameSite=None; Secure`;
 
                     messageDiv.style.display = 'block';
                     messageDiv.style.backgroundColor = '#d4edda';
