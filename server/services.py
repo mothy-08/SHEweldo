@@ -28,25 +28,22 @@ class IService(ABC):
         normalized = value_str.strip().upper().replace(" ", "_")
         return next((e for e in enum_cls if e.name == normalized), default)
     
-    def fetch_filtered_records(self, filters: FilterParams, salary_range_step: int):
+    def fetch_filtered_records(self, salary_range_step: int, filters: FilterParams = None, salary_id: str = None):
+        if filters is None and salary_id is None:
+            raise ValueError("Either 'filters' or 'salary_id' must be provided.")
+
+        if salary_id:
+            filters = FilterParams()
+            salary_record = self.db_controller.get_salary_record(salary_id)
+            filters["company_hash"] = salary_record.company_hash
+            filters["department"] = Department(salary_record.department)
+            filters["experience"] = ExperienceLevel(salary_record.experience_level)
+
         bargraph_data = self.db_controller.get_bar_graph_data(filters, salary_range_step)
         piegraph_data = self.db_controller.get_pie_graph_data(filters)
 
         return bargraph_data, piegraph_data
-    
-    def fetch_filtered_records(self,salary_range_step: int, salary_id: str):
-        filters = FilterParams()
-        salary_record = self.db_controller.get_salary_record(salary_id)
 
-        filters["company_hash"] = salary_record.company_hash
-        filters["department"] = Department(salary_record.department)
-        filters["experience"] = ExperienceLevel(salary_record.experience_level)
-        
-        bargraph_data = self.db_controller.get_bar_graph_data(filters, salary_range_step)
-        piegraph_data = self.db_controller.get_pie_graph_data(filters)
-
-        return bargraph_data, piegraph_data
-    
     @abstractmethod
     def add(self, data: Dict[str, Any]) -> tuple[Dict[str, Any], int]:
         pass

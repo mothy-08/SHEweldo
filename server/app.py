@@ -30,7 +30,7 @@ class AppAPI:
 
     def _setup_api_routes(self):
         @self._app.route("/api/salaries/submit", methods=["POST"])
-        def submit_salary():
+        def post_salary():
             try:
                 data = request.get_json()
                 response_data = self._salary_service.add(data)
@@ -54,7 +54,7 @@ class AppAPI:
                 return jsonify({"error": "Server error"}), 500
             
         @self._app.route("/api/companies/add", methods=["POST"])
-        def add_company():
+        def post_company():
             try:
                 data = request.get_json()
                 response = self._company_service.add(data)
@@ -110,51 +110,33 @@ class AppAPI:
 
         @self._app.route("/api/salaries/averages", methods=["GET"])
         def get_averages():
-            try:
-                dept = request.args.get("department")
-                if not dept:
-                    return jsonify({"error": "Missing department parameter"}), 400
-                department = Department[dept.upper()]
-                averages = self._service.calculate_averages(department)
-                return jsonify(averages), 200
-            except KeyError:
-                return jsonify({"error": "Invalid department"}), 400
-            except Exception as e:
-                return jsonify({"error": str(e)}), 500
+            pass
 
-        @self._app.route("/api/companies/<string:company_hash>/benchmark", methods=["GET"])
+        @self._app.route("/api/companies/<string:company_hash>", methods=["GET"])
         def get_benchmark(company_hash: str):
-            try:
-                company = self._db.get_company(company_hash)
-                if not company:
-                    return jsonify({"error": "Company not found"}), 404
-                benchmark = self._service.generate_benchmark(company)
-                return jsonify(benchmark), 200
-            except Exception as e:
-                return jsonify({"error": str(e)}), 500
-
-        @self._app.route("/api/salaries/comparison", methods=["POST"])
-        def get_comparison():
-            try:
-                data = request.get_json()
-                record_id = data.get("id")
-                records = self._db.get_records({"id": record_id})
-                if not records:
-                    return jsonify({"error": "Record not found"}), 404
-                comparison = self._service.generate_comparison(records[0])
-                return jsonify(comparison), 200
-            except Exception as e:
-                return jsonify({"error": str(e)}), 500
+            pass
             
     def _setup_frontend_routes(self):
-        @self._app.route('/', defaults={'path': 'salary_form.html'})
+        @self._app.route('/', defaults={'path': 'salary_form.html'})  # TODO: Change this to index.html
         @self._app.route('/<path:path>')
         def serve_frontend(path):
             return send_from_directory(self._client_dir, path)
 
-        @self._app.route("/graph/employee")
-        def serve_graph():
+        @self._app.route("/salaries/submit", methods=["GET"])
+        def submit_salary():
+            pass
+
+        @self._app.route("/companies/add", methods=["GET"])
+        def add_company():
+            pass
+
+        @self._app.route("/graph/employee", methods=["GET"])
+        def serve_employee_graph():
             return send_from_directory(self._client_dir, 'graph.html')
+
+        @self._app.route("/graph/companies/<string:company_hash>")
+        def serve_company_graph():
+            pass
 
     def _configure_error_handlers(self):
         @self._app.errorhandler(404)
