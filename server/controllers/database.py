@@ -1,8 +1,12 @@
+import os
 from abc import ABC, abstractmethod
 from pymongo import MongoClient
+from dotenv import load_dotenv
 from server.models.entities import SalaryRecord, Company
 from server.models.enums import *
 from typing import Any, Dict, List, TypedDict, Optional
+
+load_dotenv()
 
 class FilterParams(TypedDict, total=False):
     company_hash: str
@@ -36,8 +40,11 @@ class IDatabaseController(ABC):
         pass
 
 class DatabaseController(IDatabaseController):
-    def __init__(self, db_name="record_db", uri="mongodb+srv://rgdcmontoya:aMbHv1RJGfgKTHIS@sheweldo.3wuhi.mongodb.net/"):
-        self._client = MongoClient(uri)
+    def __init__(self, db_name="record_db"):
+        mongo_uri = os.getenv("MONGO_URI")  # Fetch from environment variables
+        if not mongo_uri:
+            raise ValueError("MongoDB URI not found in environment variables.")
+        self._client = MongoClient(mongo_uri)
         self._db = self._client[db_name]
 
     def get_company_record(self, hash_val: str) -> Optional[Company]:
@@ -72,8 +79,7 @@ class DatabaseController(IDatabaseController):
         query = self._build_query(filters)
         pipeline = [
             {"$match": query},
-            {"$group": {"_id": {"$floor": {"$divide": ["$salary_amount", range_step]}}, "count": {"$sum": 1}}},
-            {"$sort": {"_id": -1}}
+            {"$group": {"_id": {"$floor": {"$divide": ["$salary_amount", range_step]}}, "count": {"$sum": 1}}}
         ]
         results = self._db.salaries.aggregate(pipeline)
         return [{"range_start": doc["_id"] * range_step, "count": doc["count"]} for doc in results]
