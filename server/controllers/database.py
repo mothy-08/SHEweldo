@@ -1,227 +1,156 @@
 from abc import ABC, abstractmethod
+from typing import Dict, Any, Optional, Type
+
 from server.models.entities import SalaryRecord, Company
+from server.controllers.database import DatabaseController, FilterParams
 from server.models.enums import *
-import sqlite3
-from typing import Any, Dict, List, TypedDict, Optional
 
-class FilterParams(TypedDict, total=False):
-    company_hash: str
-    industry: Industry
-    department: Department
-    experience: ExperienceLevel
-
-class IDatabaseController(ABC):
-    @abstractmethod
-    def get_company_record(self, hash_val: str) -> Optional[Company]:
-        pass
+class IService(ABC):
+    """Base class for application services providing common utilities."""
     
-    @abstractmethod
-    def get_all_companies(self) -> list[tuple[str, str]]:
-        pass
+    def __init__(self, db_controller: DatabaseController):
+        self.db_controller = db_controller
 
-    @abstractmethod
-    def insert_salary_record(self, record: SalaryRecord) -> bool:
-        pass
-    
-    @abstractmethod
-    def insert_company(self, company: Company) -> bool:
-        pass
-
-    @abstractmethod
-    def get_salary_record(self, salary_id: str) -> Optional[SalaryRecord]:
-        pass
-
-    @abstractmethod
-    def get_filtered_records(self, filters: FilterParams) -> list[SalaryRecord]:
-        pass
-
-    @abstractmethod
-    def close(self) -> None:
-        pass
-
-class DatabaseController(IDatabaseController):
-    def __init__(self, db_name="record.db"):
-        self._db_name = db_name
-        self._connection = None
-        self._connect()
-
-    def _connect(self):
-        self._connection = sqlite3.connect(self._db_name, check_same_thread=False)
-        self._create_tables()
-
-    def _create_tables(self):
-        cursor = self._connection.cursor()
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS companies (
-                id INTEGER PRIMARY KEY,
-                hash TEXT UNIQUE,
-                name TEXT NOT NULL,
-                size TEXT CHECK(size IN ({sizes})),
-                industry TEXT CHECK(industry IN ({industries})),
-                country TEXT NOT NULL
-            )
-        '''.format(
-            sizes=", ".join(f"'{size.value}'" for size in CompanySize),
-            industries=", ".join(f"'{industry.value}'" for industry in Industry)
-        ))
-
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS salaries (
-                id TEXT PRIMARY KEY,
-                company_hash TEXT NOT NULL,
-                experience_level TEXT CHECK(experience_level IN ({experience_levels})),
-                salary_amount REAL CHECK(salary_amount > 0),
-                gender TEXT CHECK(gender IN ({genders})),
-                submission_date TEXT NOT NULL,
-                is_well_compensated BOOLEAN NOT NULL,
-                department TEXT CHECK(department IN ({departments})),
-                job_title TEXT NOT NULL,
-                FOREIGN KEY(company_hash) REFERENCES companies(hash)
-            )
-        '''.format(
-            experience_levels=", ".join(f"'{level.value}'" for level in ExperienceLevel),
-            genders=", ".join(f"'{gender.value}'" for gender in Gender),
-            departments=", ".join(f"'{department.value}'" for department in Department)
-        ))
-
-        self._connection.commit()
-
-    
-
-    def _build_where_clause_and_params(self, filters: FilterParams) -> tuple[str, List[Any]]:
-        where_clause = "WHERE 1=1"
-        params = []
-        if "company_hash" in filters:
-            where_clause += " AND company_hash = ?"
-            params.append(filters["company_hash"])
-        if "industry" in filters:
-            where_clause += " AND company_hash IN (SELECT hash FROM companies WHERE industry = ?)"
-            params.append(filters["industry"].value)
-        if "department" in filters:
-            where_clause += " AND department = ?"
-            params.append(filters["department"].value)
-        if "experience_level" in filters:
-            where_clause += " AND experience_level = ?"
-            params.append(filters["experience_level"].value)
-        return where_clause, params
-
-
-    def get_company_record(self, hash_val: str) -> Optional[Company]:
-        if not isinstance(hash_val, str):
-            raise ValueError("Invalid input: company hash must be a string")
-
-        cursor = self._connection.cursor()
-        cursor.execute("SELECT * FROM companies WHERE hash = ?", (hash_val,))
-        row = cursor.fetchone()
-        return Company(*row) if row else None
-    
-    def get_all_companies(self) -> list[tuple[str, str]]:
-        cursor = self._connection.cursor()
-        cursor.execute("SELECT name, hash FROM companies")
-        return cursor.fetchall()
-    
-    def get_salary_record(self, salary_id: str) -> Optional[SalaryRecord]:
-        if not isinstance(salary_id, str):
-            raise ValueError("Invalid input: salary_id must be a string")
+    def _str_to_enum(self, enum_cls: Type[StrEnum], value_str: Optional[str], default: StrEnum) -> StrEnum:
+        """Converts a string to an enum member using case-insensitive comparison.
         
-        cursor = self._connection.cursor()
-        cursor.execute("SELECT * FROM salaries WHERE id = ?", (salary_id,))
-        row = cursor.fetchone()
-        if row is not None:
-            reordered_row = row[1:] + (row[0],)
-            return SalaryRecord(*reordered_row)
-        else:
-            return None 
-
-    def insert_salary_record(self, record: SalaryRecord) -> bool:
-        try:
-            cursor = self._connection.cursor()
-            cursor.execute(
-                """
-                INSERT INTO salaries (
-                    id, company_hash, experience_level, salary_amount, gender, 
-                    submission_date, is_well_compensated, department, job_title
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """,
-                (
-                    record.id,
-                    record.company_hash,
-                    record.experience_level.value,
-                    record.salary_amount,
-                    record.gender.value,
-                    record.submission_date,
-                    record.is_well_compensated,
-                    record.department.value,
-                    record.job_title,
-                )
-            )
-            self._connection.commit()
-            return True
-
-        except sqlite3.Error as e:
-            print(f"SQLite Error: {e}")
-            return False
+        Args:
+            enum_cls: The Enum class to convert to
+            value_str: Input string to match against enum members
+            default: Default value if no match found
+            
+        Returns:
+            Matched enum member or default value
+        """
+        if not value_str:
+            return default
+            
+        normalized = value_str.strip().upper().replace(" ", "_")
+        return next((e for e in enum_cls if e.name == normalized), default)
     
-    def insert_company(self, company: Company) -> bool:
+    def fetch_filtered_records(self, salary_range_step: int, filters: FilterParams = None, salary_id: str = None):
+        if filters is None and salary_id is None:
+            raise ValueError("Either 'filters' or 'salary_id' must be provided.")
+
+        if salary_id:
+            filters = FilterParams()
+            salary_record = self.db_controller.get_salary_record(salary_id)
+            filters["company_hash"] = salary_record.company_hash
+            filters["department"] = Department(salary_record.department)
+            filters["experience"] = ExperienceLevel(salary_record.experience_level)
+
+        bargraph_data = self.db_controller.get_bar_graph_data(filters, salary_range_step)
+        piegraph_data = self.db_controller.get_pie_graph_data(filters)
+
+        return bargraph_data, piegraph_data
+
+    @abstractmethod
+    def add(self, data: Dict[str, Any]) -> tuple[Dict[str, Any], int]:
+        pass
+
+class SalaryService(IService):
+    _EXP_THRESHOLDS = (
+        (2, ExperienceLevel.ENTRY_LEVEL),
+        (5, ExperienceLevel.JUNIOR),
+        (9, ExperienceLevel.MID_LEVEL),
+        (14, ExperienceLevel.SENIOR),
+        (20, ExperienceLevel.EXPERT),
+        (float('inf'), ExperienceLevel.LEGENDARY)
+    )
+
+    def __init__(self, db_controller: DatabaseController):
+        super().__init__(db_controller)
+
+    def add(self, data: Dict[str, Any]) -> tuple[Dict[str, Any], int]:
+        """Process and validate a new salary record submission."""
         try:
-            cursor = self._connection.cursor()
-            cursor.execute(
-                """
-                INSERT INTO companies (
-                    hash, name, size, industry, country
-                ) VALUES (?, ?, ?, ?, ?)
-                """,
-                (
-                    company.id,
-                    company.name,
-                    company.size.value,
-                    company.industry.value,
-                    company.country,
-                )
+            if not (company_hash := data.get("company_hash")):
+                return {"message": "Missing company identifier"}
+
+            try:
+                years_at_company = int(data["years_at_the_company"])
+                total_experience = int(data["total_experience"])
+            except (KeyError, ValueError) as e:
+                return {"message": "Invalid experience data", "error": str(e)}
+
+            salary_record = SalaryRecord(
+                company_hash=company_hash,
+                experience_level=self._merge_experience(years_at_company, total_experience),
+                salary_amount=data.get("salary_amount", 0.0),
+                gender=self._str_to_gender(data.get("gender")),
+                submission_date=data.get("submission_date"),
+                is_well_compensated=data.get("is_well_compensated", False),
+                department=self._str_to_department(data.get("department")),
+                job_title=data.get("job_title")
             )
-            self._connection.commit()
-            return True
 
-        except sqlite3.Error as e:
-            print(f"SQLite Error: {e}")
-            return False
+            if not salary_record.validate():
+                return {"message": "Invalid salary data", "data": data}
+            
+            if self.db_controller.insert_salary_record(salary_record):
+                return {"message": "Salary submitted successfully", "id": salary_record.id, "salary": salary_record.salary_amount}
+    
+            return {"message": "Failed to save salary record"}
 
-    def get_filtered_records(self, filters: FilterParams) -> List[SalaryRecord]:
-        where_clause, params = self._build_where_clause_and_params(filters)
-        query = f"SELECT * FROM salaries {where_clause}"
-        cursor = self._connection.cursor()
-        cursor.execute(query, tuple(params))
-        rows = cursor.fetchall()
-        return [SalaryRecord(*row) for row in rows]
+        except Exception as e:
+            return {"message": "Processing failed", "error": str(e)}
 
-    def get_bar_graph_data(self, filters: FilterParams, range_step: int) -> list[dict]:
-        where_clause, where_params = self._build_where_clause_and_params(filters)
-        query = f"""
-            SELECT FLOOR(salary_amount / ?) * ? AS range_start, COUNT(*) AS count
-            FROM salaries
-            {where_clause}
-            GROUP BY range_start
-            ORDER BY range_start DESC
-        """
-        params = [range_step, range_step] + where_params
-        cursor = self._connection.cursor()
-        cursor.execute(query, tuple(params))
-        rows = cursor.fetchall()
-        return [{"range_start": row[0], "count": row[1]} for row in rows]
+    def _merge_experience(self, years_at_company: int, total_experience: int) -> ExperienceLevel:
+        """Determine experience level using weighted combination of experience metrics."""
+        weighted = (years_at_company * 1.5) + total_experience
+        for threshold, level in self._EXP_THRESHOLDS:
+            if weighted < threshold:
+                return level
+        return ExperienceLevel.LEGENDARY
 
-    def get_pie_graph_data(self, filters: FilterParams) -> List[Dict[str, Any]]:
-        where_clause, where_params = self._build_where_clause_and_params(filters)
-        query = f"""
-            SELECT is_well_compensated, COUNT(*) AS count
-            FROM salaries
-            {where_clause}
-            GROUP BY is_well_compensated
-        """
-        cursor = self._connection.cursor()
-        cursor.execute(query, tuple(where_params))
-        rows = cursor.fetchall()
-        return [{"is_well_compensated": row[0], "count": row[1]} for row in rows]
+    def _str_to_gender(self, gender_str: Optional[str]) -> Gender:
+        return self._str_to_enum(Gender, gender_str, Gender.OTHER)
 
-    def close(self) -> None:
-        if self._connection:
-            self._connection.close()
+    def _str_to_department(self, department_str: Optional[str]) -> Department:
+        return self._str_to_enum(Department, department_str, Department.OTHER)
+
+class CompanyService(IService):
+    _SIZE_THRESHOLDS = (
+        (50, CompanySize.SMALL),
+        (200, CompanySize.MEDIUM),
+        (400, CompanySize.LARGE),
+        (float('inf'), CompanySize.ENTERPRISE)
+    )
+
+    def __init__(self, db_controller: DatabaseController):
+        super().__init__(db_controller)
+
+    def add(self, data: Dict[str, Any]) -> tuple[Dict[str, Any], int]:
+        try:
+            if not (name := data.get("company_name")):
+                return {"message": "Company name required"}
+            try:
+                size = self._int_to_company_size(int(data["company_size"]))
+            except (KeyError, ValueError) as e:
+                return {"message": "Invalid company size", "error": str(e)}
+
+            company = Company(
+                name=name,
+                size=size,
+                industry=self._str_to_industry(data.get("company_industry")),
+                country=data.get("country")
+            )
+
+            if not company.validate():
+                return {"message": "Invalid company data", "data": data}
+            
+            if self.db_controller.insert_company(company):
+                return {"message": "Company registered successfully"}
+            return {"message": "Failed to register company"}
+
+        except Exception as e:
+            return {"message": "Processing failed", "error": str(e)}
+
+    def _str_to_industry(self, industry_str: Optional[str]) -> Industry:
+        return self._str_to_enum(Industry, industry_str, Industry.OTHER)
+
+    def _int_to_company_size(self, employee_count: int) -> CompanySize:
+        for threshold, size in self._SIZE_THRESHOLDS:
+            if employee_count <= threshold:
+                return size
+        return CompanySize.ENTERPRISE

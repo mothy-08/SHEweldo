@@ -56,7 +56,7 @@
                 total_experience: parseInt(document.getElementById('total_experience').value),
                 salary_amount: parseFloat(document.getElementById('salary_amount').value),
                 gender: document.getElementById('gender').value,
-                submission_date: new Date().toISOString().split('T')[0],  // Set to today's date
+                submission_date: new Date().toISOString().split('T')[0],
                 is_well_compensated: document.getElementById('is_well_compensated').value === "true",
                 department: document.getElementById('department').value,
                 job_title: document.getElementById('job_title').value
@@ -75,11 +75,6 @@
                 const messageDiv = document.getElementById('message');
 
                 if (response.ok) {
-                    const date = new Date();
-                    date.setFullYear(date.getFullYear() + 10);
-                    document.cookie = `salary_id=${result.id}; path=/; expires=${date.toUTCString()}; SameSite=None; Secure`;
-                    document.cookie = `salary_amount=${result.salary}; path=/; expires=${date.toUTCString()}; SameSite=None; Secure`;
-
                     messageDiv.style.display = 'block';
                     messageDiv.style.backgroundColor = '#d4edda';
                     messageDiv.style.color = '#155724';
