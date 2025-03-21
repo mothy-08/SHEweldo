@@ -1,4 +1,6 @@
-from flask import Flask, request, jsonify
+import math
+import os
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from typing import Optional
 from datetime import date
@@ -13,12 +15,20 @@ class AppAPI:
         self._salary_service = salary_service
         self._company_service = company_service
         self._db = db
+
+        current_dir = os.path.dirname(os.path.abspath(__file__)) 
+        project_dir = os.path.dirname(current_dir)
+        client_dir = os.path.join(project_dir, 'client') 
+        static_dir = os.path.join(client_dir, 'static')
+
         self._app = Flask(__name__)
         CORS(self._app, resources={r"/api/*": {"origins": "*"}}) 
-        self._setup_routes()
+        self._client_dir = client_dir
+        self._setup_api_routes()
+        self._setup_frontend_routes()
         self._configure_error_handlers()
 
-    def _setup_routes(self):
+    def _setup_api_routes(self):
         @self._app.route("/api/salaries/submit", methods=["POST"])
         def submit_salary():
             try:
@@ -45,28 +55,32 @@ class AppAPI:
             except Exception as e:
                 return jsonify({"error": "Server error"}), 500
             
-        @self._app.route("/api/graphs", methods=["GET"])
+        @self._app.route("/api/graphs/employee", methods=["GET"])
         def get_graphs():
             try:
-                filters = FilterParams()
-
+                zoom = 1000
+                filters: FilterParams = {}
+                salary_id = request.cookies.get('salary_id')
+                print(salary_id)
+                raw_salary = float(request.cookies.get('salary_amount'))
+                salary_amount = math.floor(raw_salary / zoom) * zoom
                 if 'company_hash' in request.args:
                     filters["company_hash"] = request.args.get("company_hash")
-
-                if 'industry' in request.args:
-                    filters["industry"] = Industry(request.args.get("industry").lower())
 
                 if 'department' in request.args:
                     filters["department"] = Department(request.args.get("department").lower())
 
                 if 'experience_level' in request.args:
                     filters["experience_level"] = ExperienceLevel(request.args.get("experience_level").lower())
-
-                bargraph_data, piegraph_data = self._salary_service.fetch_filtered_records(filters, 1000)
-
+                
+                if not filters:
+                    bargraph_data, piegraph_data = self._salary_service.fetch_filtered_records(zoom, salary_id)
+                else:
+                    bargraph_data, piegraph_data = self._salary_service.fetch_filtered_records(filters, zoom)
                 return jsonify({
                     "bar_graph": bargraph_data,
-                    "pie_graph": piegraph_data
+                    "pie_graph": piegraph_data,
+                    "current": salary_amount
                 }), 200
 
             except Exception as e:
@@ -109,6 +123,16 @@ class AppAPI:
                 return jsonify(comparison), 200
             except Exception as e:
                 return jsonify({"error": str(e)}), 500
+            
+    def _setup_frontend_routes(self):
+        @self._app.route('/', defaults={'path': 'salary_form.html'})
+        @self._app.route('/<path:path>')
+        def serve_frontend(path):
+            return send_from_directory(self._client_dir, path)
+
+        @self._app.route("/graph/employee")
+        def serve_graph():
+            return send_from_directory(self._client_dir, 'graph.html')
 
     def _configure_error_handlers(self):
         @self._app.errorhandler(404)
