@@ -41,7 +41,7 @@ class IDatabaseController(ABC):
 
 class DatabaseController(IDatabaseController):
     def __init__(self, db_name="record_db"):
-        mongo_uri = os.getenv("MONGO_URI")  # Fetch from environment variables
+        mongo_uri = os.getenv("MONGO_URI")
         if not mongo_uri:
             raise ValueError("MongoDB URI not found in environment variables.")
         self._client = MongoClient(mongo_uri)
