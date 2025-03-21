@@ -28,9 +28,6 @@
             <option value="Other">Other</option>
         </select><br><br>
 
-        <label for="submission_date">Submission Date:</label>
-        <input type="date" id="submission_date" name="submission_date" required><br><br>
-
         <label for="is_well_compensated">Is Well Compensated:</label>
         <select id="is_well_compensated" name="is_well_compensated">
             <option value="" selected disabled>Select</option>
@@ -47,6 +44,8 @@
         <button type="submit">Submit</button>
     </form>
 
+    <div id="message" style="display: none; padding: 10px; margin-top: 20px; border-radius: 5px;"></div>
+
     <script>
         document.getElementById('salaryForm').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -57,7 +56,7 @@
                 total_experience: parseInt(document.getElementById('total_experience').value),
                 salary_amount: parseFloat(document.getElementById('salary_amount').value),
                 gender: document.getElementById('gender').value,
-                submission_date: document.getElementById('submission_date').value,
+                submission_date: new Date().toISOString().split('T')[0],  // Set to today's date
                 is_well_compensated: document.getElementById('is_well_compensated').value === "true",
                 department: document.getElementById('department').value,
                 job_title: document.getElementById('job_title').value
@@ -76,6 +75,11 @@
                 const messageDiv = document.getElementById('message');
 
                 if (response.ok) {
+                    const date = new Date();
+                    date.setFullYear(date.getFullYear() + 10);
+                    document.cookie = `salary_id=${result.id}; path=/; expires=${date.toUTCString()}`;
+                    document.cookie = `salary_amount=${result.salary}; path=/; expires=${date.toUTCString()}`;
+
                     messageDiv.style.display = 'block';
                     messageDiv.style.backgroundColor = '#d4edda';
                     messageDiv.style.color = '#155724';
