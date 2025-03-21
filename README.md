@@ -8,6 +8,7 @@
 
 - [Introduction](#introduction)
 - [Mission and Purpose](#mission)
+- [Sustainable Development Goal](#SDG)
 - [Core Features](#features)
 - [Target Users](#users)
 - [Member Portfolio](#members)
@@ -34,8 +35,23 @@ Our mission is to:
 - Expose unfair compensation practices ⚖️
 - Address patriarchal norms within the workplace 🏢
 - Equip users with the knowledge to advocate for fair pay 💪
-- Serve as a resource for employers, policymakers, and advocacy groups to implement equitable pay structures and drive systemic change 🌍
+- Serve as a resource for employers, policymakers, and advocacy groups to implement equitable pay structures and drive change 🌍
 <br>
+
+
+### <a name="SDG"></a>
+## 🌎 Sustainable Development Goal
+<table>
+	<tr>
+		<th><img src="https://mcl.edu.ph/wp-content/uploads/2024/01/10_SDG_MakeEveryDayCount_Gifs_GDU_Optimized.gif", width=180 height=180/></a></th>
+		<td><strong>Target 10.2:</strong> By 2030, empower and promote the social, economic and political inclusion of all irrespective of age, sex, disability, race, ethnicity, origin, religion or economic or other status.</td>
+	</tr>
+</table>
+<div align="justify">
+SHEweldo aligns with Sustainable Development Goal 10: Reduced Inequalities, particularly Target 10.2, by promoting economic inclusion and fair wages. Through salary transparency and wage gap insights, the platform empowers women and marginalized groups to advocate for equitable compensation, addressing systemic pay disparities and reducing workplace discrimination. By equipping employees with salary benchmarks and negotiation tools, SHEweldo helps further financial empowerment and workplace fairness.
+</div>
+</div>
+
 
 ### <a name="features"></a>
 ## 🔍 Core Features 
