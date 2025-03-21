@@ -14,7 +14,7 @@ class AppAPI:
         self._company_service = company_service
         self._db = db
         self._app = Flask(__name__)
-        CORS(self._app, resources={r"/api/*": {"origins": "*"}}) 
+        CORS(self._app, resources={r"/api/*": {"origins": "http://localhost:5500"}})
         self._setup_routes()
         self._configure_error_handlers()
 
