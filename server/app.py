@@ -1,6 +1,6 @@
 import math
 import os
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, make_response, request, jsonify, send_from_directory
 from flask_cors import CORS
 from typing import Optional
 from datetime import date
@@ -33,10 +33,21 @@ class AppAPI:
         def submit_salary():
             try:
                 data = request.get_json()
-                response = self._salary_service.add(data)
-                if response.get("error"):
-                    return jsonify(response), 500
-                return jsonify(response), 201
+                response_data = self._salary_service.add(data)
+
+                if response_data.get("error"):
+                    return jsonify(response_data), 500
+
+                salary_id = response_data.get('id')
+                salary_amount = response_data.get('salary')
+
+                response = make_response(jsonify(response_data), 201)
+
+                response.set_cookie('salary_id', str(salary_id), max_age=315360000, path='/', samesite='None', secure=True)
+                response.set_cookie('salary_amount', str(salary_amount), max_age=315360000, path='/', samesite='None', secure=True)
+
+                return response
+            
             except ValueError as e:
                 return jsonify({"error": str(e)}), 400
             except Exception as e:
@@ -58,12 +69,14 @@ class AppAPI:
         @self._app.route("/api/graphs/employee", methods=["GET"])
         def get_graphs():
             try:
-                zoom = 1000
                 filters: FilterParams = {}
+
                 salary_id = request.cookies.get('salary_id')
-                print(salary_id)
                 raw_salary = float(request.cookies.get('salary_amount'))
-                salary_amount = math.floor(raw_salary / zoom) * zoom
+
+                range_steps = int(request.args.get("range_steps")) if request.args.get("range_steps") else 1000
+                salary_amount = math.floor(raw_salary / range_steps) * range_steps
+
                 if 'company_hash' in request.args:
                     filters["company_hash"] = request.args.get("company_hash")
 
@@ -72,17 +85,26 @@ class AppAPI:
 
                 if 'experience_level' in request.args:
                     filters["experience_level"] = ExperienceLevel(request.args.get("experience_level").lower())
-                
+
                 if not filters:
-                    bargraph_data, piegraph_data = self._salary_service.fetch_filtered_records(zoom, salary_id)
+                    bargraph_data, piegraph_data = self._salary_service.fetch_filtered_records(range_steps, salary_id)
                 else:
-                    bargraph_data, piegraph_data = self._salary_service.fetch_filtered_records(filters, zoom)
+                    bargraph_data, piegraph_data = self._salary_service.fetch_filtered_records(range_steps, filters)
+
                 return jsonify({
                     "bar_graph": bargraph_data,
                     "pie_graph": piegraph_data,
                     "current": salary_amount
                 }), 200
 
+            except Exception as e:
+                return jsonify({"error": str(e)}), 500
+
+        @self._app.route("/api/companies", methods=["GET"])
+        def get_companies():
+            try:
+                companies = db.get_all_companies()
+                return jsonify([{"name": name, "hash": hash} for name, hash in companies]), 200
             except Exception as e:
                 return jsonify({"error": str(e)}), 500
 
