@@ -8,8 +8,13 @@
 <body>
     <h2>Salary Submission Form</h2>
     <form id="salaryForm">
-        <label for="company_hash">Company Hash:</label>
-        <input type="text" id="company_hash" name="company_hash" required><br><br>
+        <div>
+            <label for="companyFilter">Company:</label>
+            <select id="companyFilter" name="company_hash" style="width: 200px;">
+                <option value="">All Companies</option>
+            </select>
+            <button type="button" id="addCompanyBtn">Add Company</button>
+        </div>
 
         <label for="years_at_the_company">Years at Company:</label>
         <input type="number" id="years_at_the_company" name="years_at_the_company" required><br><br>
@@ -35,8 +40,11 @@
             <option value="false">No</option>
         </select><br><br>
 
-        <label for="department">Department:</label>
-        <input type="text" id="department" name="department" required><br><br>
+        <div>
+            <select id="departmentFilter" style="width: 200px;">
+                <option value="">All Departments</option>
+            </select>
+        </div>
 
         <label for="job_title">Job Title:</label>
         <input type="text" id="job_title" name="job_title" required><br><br>
@@ -47,11 +55,52 @@
     <div id="message" style="display: none; padding: 10px; margin-top: 20px; border-radius: 5px;"></div>
 
     <script>
+        async function populateCompanies() {
+            try {
+                const response = await fetch('/api/companies');
+                const companies = await response.json();
+                const filter = document.getElementById('companyFilter');
+                
+                filter.innerHTML = '<option value="">All Companies</option>';
+
+                companies.sort((a, b) => a.name.localeCompare(b.name));
+                companies.forEach(company => {
+                    const option = document.createElement('option');
+                    option.value = company.hash;
+                    option.textContent = company.name;
+                    filter.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error loading companies:', error);
+            }
+        }
+
+        function populateDepartments() {
+            const departments = ['executive_leadership','operations','finance_accounting','human_resources',
+                'legal_compliance','marketing_sales','customer_service_support','technology_it','product_rd',
+                'supply_chain_logistics','other'];
+            const filter = document.getElementById('departmentFilter');
+            departments.forEach(dept => {
+                const option = document.createElement('option');
+                option.value = dept;
+                option.textContent = dept.split('_').map(word => word[0].toUpperCase() + word.slice(1)).join(' ');
+                filter.appendChild(option);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', populateDepartments);
+
+        document.addEventListener('DOMContentLoaded', populateCompanies);
+
+        document.getElementById('addCompanyBtn').addEventListener('click', () => {
+            window.location.href = '/companies/add';
+        });
+
         document.getElementById('salaryForm').addEventListener('submit', async (e) => {
             e.preventDefault();
 
             const formData = {
-                company_hash: document.getElementById('company_hash').value,
+                company_hash: document.getElementById('companyFilter').value,
                 years_at_the_company: parseInt(document.getElementById('years_at_the_company').value),
                 total_experience: parseInt(document.getElementById('total_experience').value),
                 salary_amount: parseFloat(document.getElementById('salary_amount').value),
@@ -70,7 +119,7 @@
                     },
                     body: JSON.stringify(formData)
                 });
-                console.log(response)
+
                 const result = await response.json();
                 const messageDiv = document.getElementById('message');
 
@@ -90,7 +139,6 @@
                     messageDiv.style.color = '#721c24';
                     messageDiv.textContent = result.error || 'Error submitting salary data';
                 }
-
 
                 setTimeout(() => {
                     messageDiv.style.display = 'none';

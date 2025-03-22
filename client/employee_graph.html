@@ -70,6 +70,7 @@
                 const response = await fetch('/api/companies');
                 const companies = await response.json();
                 const filter = document.getElementById('companyFilter');
+                companies.sort((a, b) => a.name.localeCompare(b.name));
                 companies.forEach(company => {
                     const option = document.createElement('option');
                     option.value = company.hash;
