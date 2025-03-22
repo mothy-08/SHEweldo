@@ -5,7 +5,7 @@ from server.models.entities import SalaryRecord, Company
 from server.controllers.database import DatabaseController, FilterParams
 from server.models.enums import *
 
-class IService(ABC):
+class Service(ABC):
     """Base class for application services providing common utilities."""
     
     def __init__(self):

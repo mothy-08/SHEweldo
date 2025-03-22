@@ -7,11 +7,11 @@ from datetime import date
 
 from models.enums import CompanySize, Department, ExperienceLevel, Gender, Industry
 from models.entities import Company, SalaryRecord
-from server.services import IService, SalaryService, CompanyService
+from server.services import Service, SalaryService, CompanyService
 from controllers.database import FilterParams, IDatabaseController
 
 class AppAPI:
-    def __init__(self,salary_service: IService, company_service: IService):
+    def __init__(self,salary_service: Service, company_service: Service):
         self._salary_service = salary_service
         self._company_service = company_service
 
@@ -116,26 +116,27 @@ class AppAPI:
             pass
             
     def _setup_frontend_routes(self):
-        @self._app.route('/', defaults={'path': 'salary_form.html'})  # TODO: Change this to index.html
+        @self._app.route('/', defaults={'path': 'index.html'})  # TODO: Change this to index.html
         @self._app.route('/<path:path>')
         def serve_frontend(path):
+            # the landing page make user choose to compare salary or compare company
             return send_from_directory(self._client_dir, path)
 
         @self._app.route("/salaries/submit", methods=["GET"])
         def submit_salary():
-            pass
+            return send_from_directory(self._client_dir, 'salary_form.html')
 
         @self._app.route("/companies/add", methods=["GET"])
         def add_company():
-            pass
+            return send_from_directory(self._client_dir, 'company_form.html')
 
         @self._app.route("/graph/employee", methods=["GET"])
         def serve_employee_graph():
-            return send_from_directory(self._client_dir, 'graph.html')
+            return send_from_directory(self._client_dir, 'employee_graph.html')
 
         @self._app.route("/graph/companies/<string:company_hash>")
         def serve_company_graph():
-            pass
+            return send_from_directory(self._client_dir, 'company_graph.html')
 
     def _configure_error_handlers(self):
         @self._app.errorhandler(404)
