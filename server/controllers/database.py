@@ -131,7 +131,7 @@ class DatabaseController(IDatabaseController):
             reordered_row = row[1:] + (row[0],)
             return SalaryRecord(*reordered_row)
         else:
-            return None 
+            return None
 
     def insert_salary_record(self, record: SalaryRecord) -> bool:
         try:

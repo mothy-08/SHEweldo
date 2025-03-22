@@ -11,10 +11,9 @@ from server.services import IService, SalaryService, CompanyService
 from controllers.database import FilterParams, IDatabaseController
 
 class AppAPI:
-    def __init__(self,salary_service: IService, company_service: IService, db: IDatabaseController):
+    def __init__(self,salary_service: IService, company_service: IService):
         self._salary_service = salary_service
         self._company_service = company_service
-        self._db = db
 
         current_dir = os.path.dirname(os.path.abspath(__file__)) 
         project_dir = os.path.dirname(current_dir)
@@ -103,7 +102,7 @@ class AppAPI:
         @self._app.route("/api/companies", methods=["GET"])
         def get_companies():
             try:
-                companies = db.get_all_companies()
+                companies = self._company_service.get_all()
                 return jsonify([{"name": name, "hash": hash} for name, hash in companies]), 200
             except Exception as e:
                 return jsonify({"error": str(e)}), 500
@@ -152,11 +151,9 @@ class AppAPI:
 
 if __name__ == "__main__":
     from server.services import SalaryService, CompanyService
-    from controllers.database import DatabaseController
     
-    db = DatabaseController()
-    salary_service = SalaryService(db)
-    company_service = CompanyService(db)
+    salary_service = SalaryService()
+    company_service = CompanyService()
     
-    api = AppAPI(salary_service, company_service, db)
+    api = AppAPI(salary_service, company_service)
     api.run(debug=True)

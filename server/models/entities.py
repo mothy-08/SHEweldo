@@ -22,7 +22,7 @@ class Company(BaseEntity):
         self._industry = industry
         self._country = country.strip()
 
-        entity_id = self.generate_hash()
+        entity_id = self._generate_hash()
         super().__init__(entity_id)
 
     def validate(self) -> bool:
@@ -53,7 +53,7 @@ class Company(BaseEntity):
     def industry(self):
         return self._industry
 
-    def generate_hash(self) -> str:
+    def _generate_hash(self) -> str:
         hash_input = f"{self.name.lower()}{self.country.lower()}".encode()
         return hashlib.sha256(hash_input).hexdigest()
 
@@ -70,7 +70,7 @@ class SalaryRecord(BaseEntity):
         self._department = department
         self._job_title = job_title.strip()
 
-        entity_id = entity_id if entity_id is not None else self.generate_hash()
+        entity_id = entity_id if entity_id is not None else self._generate_hash()
         super().__init__(entity_id)
 
     def validate(self) -> bool:
@@ -119,7 +119,7 @@ class SalaryRecord(BaseEntity):
     def job_title(self):
         return self._job_title
 
-    def generate_hash(self) -> str:
+    def _generate_hash(self) -> str:
         salt = os.urandom(16).hex()
         hash_input = f"{self.company_hash}{self.salary_amount}{self.submission_date}{salt}".encode()
         return hashlib.sha256(hash_input).hexdigest()

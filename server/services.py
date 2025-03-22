@@ -8,8 +8,8 @@ from server.models.enums import *
 class IService(ABC):
     """Base class for application services providing common utilities."""
     
-    def __init__(self, db_controller: DatabaseController):
-        self.db_controller = db_controller
+    def __init__(self):
+        self.db_controller = DatabaseController()
 
     def _str_to_enum(self, enum_cls: Type[StrEnum], value_str: Optional[str], default: StrEnum) -> StrEnum:
         """Converts a string to an enum member using case-insensitive comparison.
@@ -48,6 +48,10 @@ class IService(ABC):
     def add(self, data: Dict[str, Any]) -> tuple[Dict[str, Any], int]:
         pass
 
+    @abstractmethod
+    def get_all(self) -> list[tuple[str, str]]:
+        pass
+
 class SalaryService(IService):
     _EXP_THRESHOLDS = (
         (2, ExperienceLevel.ENTRY_LEVEL),
@@ -58,8 +62,8 @@ class SalaryService(IService):
         (float('inf'), ExperienceLevel.LEGENDARY)
     )
 
-    def __init__(self, db_controller: DatabaseController):
-        super().__init__(db_controller)
+    def __init__(self):
+        super().__init__()
 
     def add(self, data: Dict[str, Any]) -> tuple[Dict[str, Any], int]:
         """Process and validate a new salary record submission."""
@@ -94,6 +98,9 @@ class SalaryService(IService):
 
         except Exception as e:
             return {"message": "Processing failed", "error": str(e)}
+        
+    def get_all(self) -> list[tuple[str, str]]:
+        pass
 
     def _merge_experience(self, years_at_company: int, total_experience: int) -> ExperienceLevel:
         """Determine experience level using weighted combination of experience metrics."""
@@ -117,8 +124,8 @@ class CompanyService(IService):
         (float('inf'), CompanySize.ENTERPRISE)
     )
 
-    def __init__(self, db_controller: DatabaseController):
-        super().__init__(db_controller)
+    def __init__(self):
+        super().__init__()
 
     def add(self, data: Dict[str, Any]) -> tuple[Dict[str, Any], int]:
         try:
@@ -145,6 +152,10 @@ class CompanyService(IService):
 
         except Exception as e:
             return {"message": "Processing failed", "error": str(e)}
+        
+    def get_all(self) -> list[tuple[str, str]]:
+        return self.db_controller.get_all_companies()
+
 
     def _str_to_industry(self, industry_str: Optional[str]) -> Industry:
         return self._str_to_enum(Industry, industry_str, Industry.OTHER)
