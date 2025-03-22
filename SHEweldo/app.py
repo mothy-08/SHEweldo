@@ -2,7 +2,7 @@ import math
 
 from quart import Quart, jsonify, request, render_template
 
-from SHEweldo.models.enums import Department, ExperienceLevel, Industry
+from SHEweldo.models.enums import Department, ExperienceLevel, Gender, Industry
 from SHEweldo.services import Service, SalaryService, CompanyService
 from SHEweldo.controllers.database import FilterParams
 
@@ -102,6 +102,9 @@ class AppAPI:
                         request.args.get("experience_level").lower()
                     )
 
+                if "gender" in request.args:
+                    filters["gender"] = Gender(request.args.get("gender").lower())
+
                 if not filters:
                     bargraph_data, piegraph_data = await self._salary_service.fetch_filtered_records(
                         range_steps, salary_id
@@ -151,6 +154,9 @@ class AppAPI:
                     filters["experience_level"] = ExperienceLevel(
                         request.args.get("experience_level").lower()
                     )
+                
+                if "gender" in request.args:
+                    filters["gender"] = Gender(request.args.get("gender").lower())
 
                 if not filters:
                     bargraph_data, current_average, piegraph_data = await self._company_service.fetch_filtered_records(

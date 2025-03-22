@@ -30,6 +30,7 @@ class Service(ABC):
             filters["company_hash"] = salary_record.company_hash
             filters["department"] = Department(salary_record.department)
             filters["experience"] = ExperienceLevel(salary_record.experience_level)
+            filters["gender"] = Gender(salary_record.gender)
 
         bargraph_data = await self.db_controller.get_bar_graph_data(filters, salary_range_step)
         piegraph_data = await self.db_controller.get_pie_graph_data(filters)

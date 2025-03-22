@@ -8,6 +8,7 @@ class FilterParams(TypedDict, total=False):
     company_hash: str
     industry: Industry
     department: Department
+    gender: Gender
     experience: ExperienceLevel
 
 class IDatabaseController(ABC):
@@ -112,6 +113,9 @@ class DatabaseController(IDatabaseController):
         if "experience_level" in filters:
             where_clause += " AND experience_level = ?"
             params.append(filters["experience_level"].value)
+        if "gender" in filters:
+            where_clause += " AND gender = ?"
+            params.append(filters["gender"].value)
         return where_clause, params
 
     async def get_company_record(self, hash_val: str) -> Optional[Company]:

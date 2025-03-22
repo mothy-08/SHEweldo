@@ -9,7 +9,6 @@
     />
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-    <script src="{{ url_for('static', filename='/js/chart-utils.js') }}" defer></script>
   </head>
 
   <body>
@@ -36,6 +35,14 @@
           </select>
         </div>
         <div>
+          <select id="genderFilter" class="filter-select">
+            <option value="">All Gender</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div>
           <select id="rangeStepFilter" class="filter-select">
             <option value="">Select Range Step</option>
             <option value="10">10</option>
@@ -57,5 +64,7 @@
     <div class="pie-chart-container">
       <canvas id="pieChart"></canvas>
     </div>
+
+    <script src="{{ url_for('static', filename='/js/company-charts.js') }}" defer></script>
   </body>
 </html>
