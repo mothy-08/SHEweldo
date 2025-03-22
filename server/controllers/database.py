@@ -133,6 +133,20 @@ class DatabaseController(IDatabaseController):
         else:
             return None
 
+    def get_average_salary(self, company_hash: str) -> Optional[float]:
+        cursor = self._connection.cursor()
+        cursor.execute('''
+            SELECT AVG(salary_amount) 
+            FROM salaries 
+            WHERE company_hash = ?
+        ''', (company_hash,))
+
+        result = cursor.fetchone()
+        if result and result[0] is not None:
+            return float(result[0])
+        else:
+            return None
+
     def insert_salary_record(self, record: SalaryRecord) -> bool:
         try:
             cursor = self._connection.cursor()
