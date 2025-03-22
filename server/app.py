@@ -1,39 +1,59 @@
-from flask import Flask, request, jsonify
+import math
+import os
+from flask import Flask, make_response, request, jsonify, send_from_directory
 from flask_cors import CORS
 from typing import Optional
 from datetime import date
 
 from models.enums import CompanySize, Department, ExperienceLevel, Gender, Industry
 from models.entities import Company, SalaryRecord
-from server.services import IService, SalaryService, CompanyService
+from server.services import Service, SalaryService, CompanyService
 from controllers.database import FilterParams, IDatabaseController
 
 class AppAPI:
-    def __init__(self,salary_service: IService, company_service: IService, db: IDatabaseController):
+    def __init__(self,salary_service: Service, company_service: Service):
         self._salary_service = salary_service
         self._company_service = company_service
-        self._db = db
+
+        current_dir = os.path.dirname(os.path.abspath(__file__)) 
+        project_dir = os.path.dirname(current_dir)
+        client_dir = os.path.join(project_dir, 'client') 
+        static_dir = os.path.join(client_dir, 'static')
+
         self._app = Flask(__name__)
-        CORS(self._app, resources={r"/api/*": {"origins": "http://localhost:5500"}})
-        self._setup_routes()
+        CORS(self._app, resources={r"/api/*": {"origins": "*"}}) 
+        self._client_dir = client_dir
+        self._setup_api_routes()
+        self._setup_frontend_routes()
         self._configure_error_handlers()
 
-    def _setup_routes(self):
+    def _setup_api_routes(self):
         @self._app.route("/api/salaries/submit", methods=["POST"])
-        def submit_salary():
+        def post_salary():
             try:
                 data = request.get_json()
-                response = self._salary_service.add(data)
-                if response.get("error"):
-                    return jsonify(response), 500
-                return jsonify(response), 201
+                response_data = self._salary_service.add(data)
+
+                if response_data.get("error"):
+                    return jsonify(response_data), 500
+
+                salary_id = response_data.get('id')
+                salary_amount = response_data.get('salary')
+
+                response = make_response(jsonify(response_data), 201)
+
+                response.set_cookie('salary_id', str(salary_id), max_age=315360000, path='/', samesite='None', secure=True)
+                response.set_cookie('salary_amount', str(salary_amount), max_age=315360000, path='/', samesite='None', secure=True)
+
+                return response
+            
             except ValueError as e:
                 return jsonify({"error": str(e)}), 400
             except Exception as e:
                 return jsonify({"error": "Server error"}), 500
             
         @self._app.route("/api/companies/add", methods=["POST"])
-        def add_company():
+        def post_company():
             try:
                 data = request.get_json()
                 response = self._company_service.add(data)
@@ -45,16 +65,19 @@ class AppAPI:
             except Exception as e:
                 return jsonify({"error": "Server error"}), 500
             
-        @self._app.route("/api/graphs", methods=["GET"])
+        @self._app.route("/api/graphs/employee", methods=["GET"])
         def get_graphs():
             try:
-                filters = FilterParams()
+                filters: FilterParams = {}
+
+                salary_id = request.cookies.get('salary_id')
+                raw_salary = float(request.cookies.get('salary_amount'))
+
+                range_steps = int(request.args.get("range_steps")) if request.args.get("range_steps") else 1000
+                salary_amount = math.floor(raw_salary / range_steps) * range_steps
 
                 if 'company_hash' in request.args:
                     filters["company_hash"] = request.args.get("company_hash")
-
-                if 'industry' in request.args:
-                    filters["industry"] = Industry(request.args.get("industry").lower())
 
                 if 'department' in request.args:
                     filters["department"] = Department(request.args.get("department").lower())
@@ -62,53 +85,79 @@ class AppAPI:
                 if 'experience_level' in request.args:
                     filters["experience_level"] = ExperienceLevel(request.args.get("experience_level").lower())
 
-                bargraph_data, piegraph_data = self._salary_service.fetch_filtered_records(filters, 1000)
+                if not filters:
+                    bargraph_data, piegraph_data = self._salary_service.fetch_filtered_records(range_steps, salary_id)
+                else:
+                    bargraph_data, piegraph_data = self._salary_service.fetch_filtered_records(range_steps, filters)
 
                 return jsonify({
                     "bar_graph": bargraph_data,
-                    "pie_graph": piegraph_data
+                    "pie_graph": piegraph_data,
+                    "current": salary_amount
                 }), 200
 
             except Exception as e:
                 return jsonify({"error": str(e)}), 500
 
-        @self._app.route("/api/salaries/averages", methods=["GET"])
-        def get_averages():
+        @self._app.route("/api/companies", methods=["GET"])
+        def get_companies():
             try:
-                dept = request.args.get("department")
-                if not dept:
-                    return jsonify({"error": "Missing department parameter"}), 400
-                department = Department[dept.upper()]
-                averages = self._service.calculate_averages(department)
-                return jsonify(averages), 200
-            except KeyError:
-                return jsonify({"error": "Invalid department"}), 400
+                companies = self._company_service.get_all()
+                return jsonify([{"name": name, "hash": hash} for name, hash in companies]), 200
             except Exception as e:
                 return jsonify({"error": str(e)}), 500
 
-        @self._app.route("/api/companies/<string:company_hash>/benchmark", methods=["GET"])
+        @self._app.route("/api/companies/<string:company_hash>", methods=["GET"])
         def get_benchmark(company_hash: str):
             try:
-                company = self._db.get_company(company_hash)
-                if not company:
-                    return jsonify({"error": "Company not found"}), 404
-                benchmark = self._service.generate_benchmark(company)
-                return jsonify(benchmark), 200
-            except Exception as e:
-                return jsonify({"error": str(e)}), 500
+                filters: FilterParams = {}
 
-        @self._app.route("/api/salaries/comparison", methods=["POST"])
-        def get_comparison():
-            try:
-                data = request.get_json()
-                record_id = data.get("id")
-                records = self._db.get_records({"id": record_id})
-                if not records:
-                    return jsonify({"error": "Record not found"}), 404
-                comparison = self._service.generate_comparison(records[0])
-                return jsonify(comparison), 200
+                range_steps = int(request.args.get("range_steps")) if request.args.get("range_steps") else 1000
+
+                if 'department' in request.args:
+                    filters["department"] = Department(request.args.get("department").lower())
+
+                if 'industry' in request.args:
+                    filters["industry"] = Industry(request.args.get("industry").lower())
+
+                if 'experience_level' in request.args:
+                    filters["experience_level"] = ExperienceLevel(request.args.get("experience_level").lower())
+
+                if not filters:
+                    bargraph_data, current_average = self._company_service.fetch_filtered_records(range_steps, company_hash)
+                else:
+                    bargraph_data, current_average = self._company_service.fetch_filtered_records(range_steps, filters, company_hash)
+
+                return jsonify({
+                    "bar_graph": bargraph_data,
+                    "current_avg": current_average
+                }), 200
+
             except Exception as e:
                 return jsonify({"error": str(e)}), 500
+            
+    def _setup_frontend_routes(self):
+        @self._app.route('/', defaults={'path': 'salary_form.html'})  # TODO: Change this to index.html
+        @self._app.route('/<path:path>')
+        def serve_frontend(path):
+            # the landing page make user choose to compare salary or compare company
+            return send_from_directory(self._client_dir, path)
+
+        @self._app.route("/salaries/submit", methods=["GET"])
+        def submit_salary():
+            return send_from_directory(self._client_dir, 'salary_form.html')
+
+        @self._app.route("/companies/add", methods=["GET"])
+        def add_company():
+            return send_from_directory(self._client_dir, 'company_form.html')
+
+        @self._app.route("/graph/employee", methods=["GET"])
+        def serve_employee_graph():
+            return send_from_directory(self._client_dir, 'employee_graph.html')
+
+        @self._app.route("/graph/companies/<string:company_hash>")
+        def serve_company_graph():
+            return send_from_directory(self._client_dir, 'company_graph.html')
 
     def _configure_error_handlers(self):
         @self._app.errorhandler(404)
@@ -124,11 +173,9 @@ class AppAPI:
 
 if __name__ == "__main__":
     from server.services import SalaryService, CompanyService
-    from controllers.database import DatabaseController
     
-    db = DatabaseController()
-    salary_service = SalaryService(db)
-    company_service = CompanyService(db)
+    salary_service = SalaryService()
+    company_service = CompanyService()
     
-    api = AppAPI(salary_service, company_service, db)
+    api = AppAPI(salary_service, company_service)
     api.run(debug=True)
