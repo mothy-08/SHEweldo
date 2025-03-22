@@ -52,7 +52,7 @@ class Service(ABC):
     def get_all(self) -> list[tuple[str, str]]:
         pass
 
-class SalaryService(IService):
+class SalaryService(Service):
     _EXP_THRESHOLDS = (
         (2, ExperienceLevel.ENTRY_LEVEL),
         (5, ExperienceLevel.JUNIOR),
@@ -116,7 +116,7 @@ class SalaryService(IService):
     def _str_to_department(self, department_str: Optional[str]) -> Department:
         return self._str_to_enum(Department, department_str, Department.OTHER)
 
-class CompanyService(IService):
+class CompanyService(Service):
     _SIZE_THRESHOLDS = (
         (50, CompanySize.SMALL),
         (200, CompanySize.MEDIUM),
