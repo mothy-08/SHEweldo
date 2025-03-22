@@ -80,12 +80,17 @@
                     messageDiv.style.color = '#155724';
                     messageDiv.textContent = 'Submission successful! Thank you for your contribution.';
                     document.getElementById('salaryForm').reset();
+
+                    setTimeout(() => {
+                        window.location.href = '/graph/employee';
+                    }, 1000);
                 } else {
                     messageDiv.style.display = 'block';
                     messageDiv.style.backgroundColor = '#f8d7da';
                     messageDiv.style.color = '#721c24';
                     messageDiv.textContent = result.error || 'Error submitting salary data';
                 }
+
 
                 setTimeout(() => {
                     messageDiv.style.display = 'none';
