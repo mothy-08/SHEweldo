@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
-from models.entities import SalaryRecord, Company
-from models.enums import *
+from SHEweldo.models.entities import SalaryRecord, Company
+from SHEweldo.models.enums import *
 import aiosqlite
 from typing import Any, Dict, List, Tuple, TypedDict, Optional
 

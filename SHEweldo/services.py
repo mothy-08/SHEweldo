@@ -1,9 +1,9 @@
 from abc import ABC, abstractmethod
 from typing import Dict, Any, Optional, Type
 
-from models.entities import SalaryRecord, Company
-from controllers.database import DatabaseController, FilterParams
-from models.enums import *
+from SHEweldo.models.entities import SalaryRecord, Company
+from SHEweldo.controllers.database import DatabaseController, FilterParams
+from SHEweldo.models.enums import *
 
 class Service(ABC):
     
