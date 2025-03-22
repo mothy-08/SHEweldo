@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from server.models.entities import SalaryRecord, Company
 from server.models.enums import *
 import sqlite3
-from typing import Any, Dict, List, TypedDict, Optional
+from typing import Any, Dict, List, Tuple, TypedDict, Optional
 
 class FilterParams(TypedDict, total=False):
     company_hash: str
@@ -133,7 +133,7 @@ class DatabaseController(IDatabaseController):
         else:
             return None
 
-    def get_average_salary(self, company_hash: str) -> Optional[float]:
+    def get_average_salary(self, company_hash: str) -> float:
         cursor = self._connection.cursor()
         cursor.execute('''
             SELECT AVG(salary_amount) 
@@ -145,7 +145,7 @@ class DatabaseController(IDatabaseController):
         if result and result[0] is not None:
             return float(result[0])
         else:
-            return None
+            return 0
 
     def insert_salary_record(self, record: SalaryRecord) -> bool:
         try:
@@ -207,6 +207,28 @@ class DatabaseController(IDatabaseController):
         cursor.execute(query, tuple(params))
         rows = cursor.fetchall()
         return [SalaryRecord(*row) for row in rows]
+
+    def get_benchmark_data(self, filters: FilterParams, range_step: int) -> List[Dict[str, Any]]:
+        where_clause, params = self._build_where_clause_and_params(filters)
+        
+        query = f"""
+            WITH company_avg_salaries AS (
+                SELECT company_hash, AVG(salary_amount) AS avg_salary
+                FROM salaries
+                {where_clause}
+                GROUP BY company_hash
+            )
+            SELECT FLOOR(avg_salary / ?) * ? AS range_start, COUNT(*) AS count
+            FROM company_avg_salaries
+            GROUP BY range_start
+            ORDER BY range_start
+        """
+        params = [range_step, range_step] + params
+        cursor = self._connection.cursor()
+        cursor.execute(query, tuple(params))
+
+        results = cursor.fetchall()
+        return [{"range_start": row[0], "count": row[1]} for row in results]
 
     def get_bar_graph_data(self, filters: FilterParams, range_step: int) -> list[dict]:
         where_clause, where_params = self._build_where_clause_and_params(filters)

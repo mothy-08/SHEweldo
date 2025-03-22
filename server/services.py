@@ -28,13 +28,13 @@ class Service(ABC):
         normalized = value_str.strip().upper().replace(" ", "_")
         return next((e for e in enum_cls if e.name == normalized), default)
     
-    def fetch_filtered_records(self, salary_range_step: int, filters: FilterParams = None, salary_id: str = None):
-        if filters is None and salary_id is None:
-            raise ValueError("Either 'filters' or 'salary_id' must be provided.")
+    def fetch_filtered_records(self, salary_range_step: int, filters: FilterParams = None, id: str = None):
+        if filters is None and id is None:
+            raise ValueError("Either 'filters' or 'id' must be provided.")
 
-        if salary_id:
+        if id:
             filters = FilterParams()
-            salary_record = self.db_controller.get_salary_record(salary_id)
+            salary_record = self.db_controller.get_salary_record(id)
             filters["company_hash"] = salary_record.company_hash
             filters["department"] = Department(salary_record.department)
             filters["experience"] = ExperienceLevel(salary_record.experience_level)
@@ -126,6 +126,16 @@ class CompanyService(Service):
 
     def __init__(self):
         super().__init__()
+
+    def fetch_filtered_records(self, salary_range_step: int, filters: FilterParams = None, id: str = None):
+        if filters is None and id is None:
+            raise ValueError("Either 'filters' or 'id' must be provided.")
+
+        benchmark_data = self.db_controller.get_benchmark_data(filters, salary_range_step)
+        current_average = self.db_controller.get_average_salary(id)
+
+        return benchmark_data, current_average
+
 
     def add(self, data: Dict[str, Any]) -> tuple[Dict[str, Any], int]:
         try:
