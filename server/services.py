@@ -138,8 +138,7 @@ class CompanyService(Service):
         benchmark_data = await self.db_controller.get_benchmark_data(filters, salary_range_step)
         current_average = (await self.db_controller.get_average_salary(id) // salary_range_step) * salary_range_step
 
-        filters['company_hash'] = id
-        pie_graph_data = await self.db_controller.get_pie_graph_data(filters)
+        pie_graph_data = await self.db_controller.get_pie_graph_data(filters, id)
 
         return benchmark_data, current_average, pie_graph_data
 

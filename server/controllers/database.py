@@ -256,8 +256,13 @@ class DatabaseController(IDatabaseController):
         rows = await cursor.fetchall()
         return [{"range_start": row[0], "count": row[1]} for row in rows]
 
-    async def get_pie_graph_data(self, filters: FilterParams) -> List[Dict[str, Any]]:
+    async def get_pie_graph_data(self, filters: FilterParams, id: str = None) -> List[Dict[str, Any]]:
         where_clause, where_params = await self._build_where_clause_and_params(filters)
+
+        if id:
+            where_clause += " AND company_hash = ?"
+            where_params.append(id)
+            
         query = f"""
             SELECT is_well_compensated, COUNT(*) AS count
             FROM salaries
