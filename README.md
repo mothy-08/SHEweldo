@@ -38,7 +38,6 @@ Our mission is to:
 - Serve as a resource for employers, policymakers, and advocacy groups to implement equitable pay structures and drive change 🌍
 <br>
 
-
 ### <a name="SDG"></a>
 ## 🌎 Sustainable Development Goal
 <table>
@@ -51,7 +50,6 @@ Our mission is to:
 SHEweldo aligns with Sustainable Development Goal 10: Reduced Inequalities, particularly Target 10.2, by promoting economic inclusion and fair wages. Through salary transparency and wage gap insights, the platform empowers women and marginalized groups to advocate for equitable compensation, addressing systemic pay disparities and reducing workplace discrimination. By equipping employees with salary benchmarks and negotiation tools, SHEweldo helps further financial empowerment and workplace fairness.
 </div>
 </div>
-
 
 ### <a name="features"></a>
 ## 🔍 Core Features 
@@ -187,4 +185,3 @@ SHEweldo is designed to serve a diverse range of users:
 ### <a name="ack"></a>
 ## 🩷 Acknowledgement
 The team would like to acknowledge and extend gratitude to our professor, Ms. Fatima Marie Agdon, MSCS. Her dedication in guiding us throughout the development of the activity has immensely helped us achieve our goals.
-
