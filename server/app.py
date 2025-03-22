@@ -222,6 +222,7 @@ async def main():
     await company_service.initialize()
 
     api = AppAPI(salary_service, company_service)
+
     api.run(debug=True)
 
 
@@ -230,8 +231,19 @@ if __name__ == "__main__":
     from hypercorn.asyncio import serve
     from hypercorn.config import Config
 
-    config = Config()
-    config.bind = ["0.0.0.0:5000"]
-    config.use_reloader = True
+    async def run_app():
+        salary_service = SalaryService()
+        company_service = CompanyService()
 
-    asyncio.run(serve(AppAPI(SalaryService(), CompanyService())._app, config))
+        await salary_service.initialize()
+        await company_service.initialize()
+
+        api = AppAPI(salary_service, company_service)
+
+        config = Config()
+        config.bind = ["0.0.0.0:5000"]
+        config.use_reloader = True
+
+        await serve(api._app, config)
+
+    asyncio.run(run_app())
