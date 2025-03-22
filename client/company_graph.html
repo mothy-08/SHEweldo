@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Server Data Visualization</title>
+    <title>Company Data Visualization</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -26,6 +26,11 @@
                 </select>
             </div>
             <div>
+                <select id="industryFilter" style="width: 200px;">
+                    <option value="">All Industries</option>
+                </select>
+            </div>
+            <div>
                 <button id="applyFilters" style="padding: 5px 15px; cursor: pointer;">Apply Filters</button>
             </div>
         </div>
@@ -33,13 +38,9 @@
     <div style="width: 80%; margin: 0 auto;">
         <canvas id="barChart"></canvas>
     </div>
-    <div style="width: 50%; margin: 20px auto;">
-        <canvas id="pieChart"></canvas>
-    </div>
 
     <script>
         let barChart = null;
-        let pieChart = null;
 
         $(document).ready(async function() {
             $('#companyFilter').select2({
@@ -51,6 +52,7 @@
             await populateCompanies();
             populateDepartments();
             populateExperienceLevels();
+            populateIndustries();
             fetchData();
 
             $('#applyFilters').click(fetchData);
@@ -61,12 +63,27 @@
                 const response = await fetch('/api/companies');
                 const companies = await response.json();
                 const filter = document.getElementById('companyFilter');
-                companies.forEach(company => {
+
+                // Clear existing options (except the default "All Companies")
+                filter.innerHTML = '<option value="">All Companies</option>';
+
+                // Sort companies alphabetically by name
+                companies.sort((a, b) => a.name.localeCompare(b.name));
+
+                // Add sorted companies to the dropdown
+                companies.forEach((company, index) => {
                     const option = document.createElement('option');
                     option.value = company.hash;
                     option.textContent = company.name;
                     filter.appendChild(option);
+
+                    // Set the first company as the default selected option
+                    if (index === 0) {
+                        option.selected = true;
+                    }
                 });
+
+                // Trigger Select2 to update the UI
                 $('#companyFilter').trigger('change.select2');
             } catch (error) {
                 console.error('Error loading companies:', error);
@@ -97,12 +114,24 @@
             });
         }
 
+        function populateIndustries() {
+            const industries = ['technology', 'finance', 'healthcare', 'manufacturing', 'retail', 'other'];
+            const filter = document.getElementById('industryFilter');
+            industries.forEach(industry => {
+                const option = document.createElement('option');
+                option.value = industry;
+                option.textContent = industry.charAt(0).toUpperCase() + industry.slice(1);
+                filter.appendChild(option);
+            });
+        }
+
         async function fetchData() {
             try {
                 const filters = {
                     company_hash: $('#companyFilter').val(),
                     department: $('#departmentFilter').val(),
-                    experience_level: $('#experienceLevelFilter').val()
+                    experience_level: $('#experienceLevelFilter').val(),
+                    industry: $('#industryFilter').val()
                 };
 
                 const filteredParams = Object.fromEntries(
@@ -112,23 +141,22 @@
                 const params = new URLSearchParams(filteredParams);
                 const parameter = params.toString() ? `?${params.toString()}` : '';
 
-                const response = await fetch(`http://localhost:5000/api/graphs/employee${parameter}`);
+                const response = await fetch(`/api/companies/${$('#companyFilter').val()}${parameter}`);
                 const data = await response.json();
-                updateCharts(data);
+                updateBarChart(data);
             } catch (error) {
                 console.error('Error fetching data:', error);
             }
         }
 
-        function updateCharts(data) {
+        function updateBarChart(data) {
             if (barChart) barChart.destroy();
-            if (pieChart) pieChart.destroy();
 
             const barData = data.bar_graph;
-            const currentValue = data.current;
+            const currentAvg = data.current_avg;
             const labels = barData.map(b => b.range_start.toString());
             const counts = barData.map(b => b.count);
-            let highlightIndex = barData.findIndex(b => currentValue >= b.range_start);
+            let highlightIndex = barData.findIndex(b => currentAvg >= b.range_start);
             if (highlightIndex === -1) highlightIndex = barData.length - 1;
 
             const barCtx = document.getElementById('barChart').getContext('2d');
@@ -148,31 +176,10 @@
                     scales: {
                         y: { beginAtZero: true, title: { display: true, text: 'Count' } },
                         x: { title: { display: true, text: 'Range Start' }, ticks: { autoSkip: false, maxRotation: 90, minRotation: 90 } }
-                    }
-                }
-            });
-
-            const pieData = data.pie_graph;
-            const compensated = pieData.find(p => p.is_well_compensated === 1)?.count || 0;
-            const notCompensated = pieData.find(p => p.is_well_compensated === 0)?.count || 0;
-
-            const pieCtx = document.getElementById('pieChart').getContext('2d');
-            pieChart = new Chart(pieCtx, {
-                type: 'pie',
-                data: {
-                    labels: ['Well Compensated', 'Not Well Compensated'],
-                    datasets: [{
-                        data: [compensated, notCompensated],
-                        backgroundColor: ['rgba(75, 192, 192, 0.8)', 'rgba(255, 99, 132, 0.8)'],
-                        borderColor: 'rgba(75, 75, 75, 1)',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
+                    },
                     plugins: {
-                        legend: { position: 'top' },
-                        title: { display: true, text: 'Compensation Distribution' }
+                        legend: { display: false },
+                        tooltip: { enabled: true }
                     }
                 }
             });

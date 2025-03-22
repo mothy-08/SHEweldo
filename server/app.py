@@ -154,7 +154,7 @@ class AppAPI:
         def serve_employee_graph():
             return send_from_directory(self._client_dir, 'employee_graph.html')
 
-        @self._app.route("/graph/companies/<string:company_hash>")
+        @self._app.route("/graph/companies/")
         def serve_company_graph():
             return send_from_directory(self._client_dir, 'company_graph.html')
 
