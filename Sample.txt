@@ -10,6 +10,12 @@
     "department": "Engineering",
     "job_title": "Senior Software Engineer"
 }
+Output:
+{
+    "id": "826c7760082f043b23df0bff54f94545d4e2a915fddbf4df6041c2e3aca4cf65", // kindly use this as cookies
+    "message": "Salary submitted successfully"
+}
+
 
 0.0.0.0:5000/api/companies/add
 {

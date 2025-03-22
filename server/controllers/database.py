@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from server.models.entities import SalaryRecord, Company
 from server.models.enums import *
 import sqlite3
-from typing import Any, Dict, List, TypedDict, Optional
+from typing import Any, Dict, List, Tuple, TypedDict, Optional
 
 class FilterParams(TypedDict, total=False):
     company_hash: str
@@ -25,6 +25,14 @@ class IDatabaseController(ABC):
     
     @abstractmethod
     def insert_company(self, company: Company) -> bool:
+        pass
+
+    @abstractmethod
+    def get_salary_record(self, salary_id: str) -> Optional[SalaryRecord]:
+        pass
+
+    @abstractmethod
+    def get_average_salary(self, company_hash: str) -> float:
         pass
 
     @abstractmethod
@@ -115,6 +123,33 @@ class DatabaseController(IDatabaseController):
         cursor = self._connection.cursor()
         cursor.execute("SELECT name, hash FROM companies")
         return cursor.fetchall()
+    
+    def get_salary_record(self, salary_id: str) -> Optional[SalaryRecord]:
+        if not isinstance(salary_id, str):
+            raise ValueError("Invalid input: salary_id must be a string")
+        
+        cursor = self._connection.cursor()
+        cursor.execute("SELECT * FROM salaries WHERE id = ?", (salary_id,))
+        row = cursor.fetchone()
+        if row is not None:
+            reordered_row = row[1:] + (row[0],)
+            return SalaryRecord(*reordered_row)
+        else:
+            return None
+
+    def get_average_salary(self, company_hash: str) -> float:
+        cursor = self._connection.cursor()
+        cursor.execute('''
+            SELECT AVG(salary_amount) 
+            FROM salaries 
+            WHERE company_hash = ?
+        ''', (company_hash,))
+
+        result = cursor.fetchone()
+        if result and result[0] is not None:
+            return float(result[0])
+        else:
+            return 0
 
     def insert_salary_record(self, record: SalaryRecord) -> bool:
         try:
@@ -176,6 +211,28 @@ class DatabaseController(IDatabaseController):
         cursor.execute(query, tuple(params))
         rows = cursor.fetchall()
         return [SalaryRecord(*row) for row in rows]
+
+    def get_benchmark_data(self, filters: FilterParams, range_step: int) -> List[Dict[str, Any]]:
+        where_clause, params = self._build_where_clause_and_params(filters)
+        
+        query = f"""
+            WITH company_avg_salaries AS (
+                SELECT company_hash, AVG(salary_amount) AS avg_salary
+                FROM salaries
+                {where_clause}
+                GROUP BY company_hash
+            )
+            SELECT FLOOR(avg_salary / ?) * ? AS range_start, COUNT(*) AS count
+            FROM company_avg_salaries
+            GROUP BY range_start
+            ORDER BY range_start
+        """
+        params = [range_step, range_step] + params
+        cursor = self._connection.cursor()
+        cursor.execute(query, tuple(params))
+
+        results = cursor.fetchall()
+        return [{"range_start": row[0], "count": row[1]} for row in results]
 
     def get_bar_graph_data(self, filters: FilterParams, range_step: int) -> list[dict]:
         where_clause, where_params = self._build_where_clause_and_params(filters)
