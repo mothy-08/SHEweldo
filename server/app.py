@@ -23,6 +23,7 @@ class AppAPI:
         static_dir = os.path.join(client_dir, "static")
 
         self._app = Quart(__name__)
+        self._app.debug = True
         self._app = cors(self._app, allow_origin="*")
         self._client_dir = client_dir
 
@@ -31,10 +32,14 @@ class AppAPI:
         self._configure_error_handlers()
 
     def _setup_api_routes(self):
+
         @self._app.route("/api/salaries/submit", methods=["POST"])
         async def post_salary():
             try:
                 data = await request.get_json()
+                if not data:
+                    return jsonify({"error": "No data provided"}), 400
+
                 response_data = await self._salary_service.add(data)
 
                 if response_data.get("error"):
@@ -43,7 +48,7 @@ class AppAPI:
                 salary_id = response_data.get("id")
                 salary_amount = response_data.get("salary")
 
-                response = await jsonify(response_data)
+                response = jsonify(response_data)
                 response.status_code = 201
 
                 response.set_cookie(
@@ -69,7 +74,7 @@ class AppAPI:
                 return jsonify({"error": str(e)}), 400
             except Exception as e:
                 return jsonify({"error": "Server error"}), 500
-
+            
         @self._app.route("/api/companies/add", methods=["POST"])
         async def post_company():
             try:
