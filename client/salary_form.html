@@ -63,7 +63,7 @@
             };
 
             try {
-                const response = await fetch('http://localhost:5000/api/salaries/submit', {
+                const response = await fetch('/api/salaries/submit', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -83,7 +83,7 @@
 
                     setTimeout(() => {
                         window.location.href = '/graph/employee';
-                    }, 1000);
+                    }, 500);
                 } else {
                     messageDiv.style.display = 'block';
                     messageDiv.style.backgroundColor = '#f8d7da';
