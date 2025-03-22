@@ -11,6 +11,10 @@ class Service(ABC):
     def __init__(self):
         self.db_controller = DatabaseController()
 
+    async def initialize(self):
+        """Initialize the database connection."""
+        await self.db_controller.initialize()
+
     def _str_to_enum(self, enum_cls: Type[StrEnum], value_str: Optional[str], default: StrEnum) -> StrEnum:
         """Converts a string to an enum member using case-insensitive comparison.
         
@@ -28,28 +32,28 @@ class Service(ABC):
         normalized = value_str.strip().upper().replace(" ", "_")
         return next((e for e in enum_cls if e.name == normalized), default)
     
-    def fetch_filtered_records(self, salary_range_step: int, filters: FilterParams = None, id: str = None):
+    async def fetch_filtered_records(self, salary_range_step: int, filters: FilterParams = None, id: str = None):
         if filters is None and id is None:
             raise ValueError("Either 'filters' or 'id' must be provided.")
 
         if id:
             filters = FilterParams()
-            salary_record = self.db_controller.get_salary_record(id)
+            salary_record = await self.db_controller.get_salary_record(id)
             filters["company_hash"] = salary_record.company_hash
             filters["department"] = Department(salary_record.department)
             filters["experience"] = ExperienceLevel(salary_record.experience_level)
 
-        bargraph_data = self.db_controller.get_bar_graph_data(filters, salary_range_step)
-        piegraph_data = self.db_controller.get_pie_graph_data(filters)
+        bargraph_data = await self.db_controller.get_bar_graph_data(filters, salary_range_step)
+        piegraph_data = await self.db_controller.get_pie_graph_data(filters)
 
         return bargraph_data, piegraph_data
 
     @abstractmethod
-    def add(self, data: Dict[str, Any]) -> tuple[Dict[str, Any], int]:
+    async def add(self, data: Dict[str, Any]) -> tuple[Dict[str, Any], int]:
         pass
 
     @abstractmethod
-    def get_all(self) -> list[tuple[str, str]]:
+    async def get_all(self) -> list[tuple[str, str]]:
         pass
 
 class SalaryService(Service):
@@ -65,7 +69,7 @@ class SalaryService(Service):
     def __init__(self):
         super().__init__()
 
-    def add(self, data: Dict[str, Any]) -> tuple[Dict[str, Any], int]:
+    async def add(self, data: Dict[str, Any]) -> tuple[Dict[str, Any], int]:
         """Process and validate a new salary record submission."""
         try:
             if not (company_hash := data.get("company_hash")):
@@ -91,7 +95,7 @@ class SalaryService(Service):
             if not salary_record.validate():
                 return {"message": "Invalid salary data", "data": data}
             
-            if self.db_controller.insert_salary_record(salary_record):
+            if await self.db_controller.insert_salary_record(salary_record):
                 return {"message": "Salary submitted successfully", "id": salary_record.id, "salary": salary_record.salary_amount}
     
             return {"message": "Failed to save salary record"}
@@ -99,8 +103,8 @@ class SalaryService(Service):
         except Exception as e:
             return {"message": "Processing failed", "error": str(e)}
         
-    def get_all(self) -> list[tuple[str, str]]:
-        pass
+    async def get_all(self) -> list[tuple[str, str]]:
+        return await self.db_controller.get_all_companies()
 
     def _merge_experience(self, years_at_company: int, total_experience: int) -> ExperienceLevel:
         """Determine experience level using weighted combination of experience metrics."""
@@ -115,7 +119,7 @@ class SalaryService(Service):
 
     def _str_to_department(self, department_str: Optional[str]) -> Department:
         return self._str_to_enum(Department, department_str, Department.OTHER)
-
+    
 class CompanyService(Service):
     _SIZE_THRESHOLDS = (
         (50, CompanySize.SMALL),
@@ -127,17 +131,18 @@ class CompanyService(Service):
     def __init__(self):
         super().__init__()
 
-    def fetch_filtered_records(self, salary_range_step: int, filters: FilterParams = None, id: str = None):
+    async def fetch_filtered_records(self, salary_range_step: int, filters: FilterParams = FilterParams(), id: str = None):
         if filters is None and id is None:
             raise ValueError("Either 'filters' or 'id' must be provided.")
 
-        benchmark_data = self.db_controller.get_benchmark_data(filters, salary_range_step)
-        current_average = self.db_controller.get_average_salary(id)
+        benchmark_data = await self.db_controller.get_benchmark_data(filters, salary_range_step)
+        current_average = (await self.db_controller.get_average_salary(id) // salary_range_step) * salary_range_step
 
-        return benchmark_data, current_average
+        pie_graph_data = await self.db_controller.get_pie_graph_data(filters, id)
 
+        return benchmark_data, current_average, pie_graph_data
 
-    def add(self, data: Dict[str, Any]) -> tuple[Dict[str, Any], int]:
+    async def add(self, data: Dict[str, Any]) -> tuple[Dict[str, Any], int]:
         try:
             if not (name := data.get("company_name")):
                 return {"message": "Company name required"}
@@ -156,16 +161,15 @@ class CompanyService(Service):
             if not company.validate():
                 return {"message": "Invalid company data", "data": data}
             
-            if self.db_controller.insert_company(company):
+            if await self.db_controller.insert_company(company):
                 return {"message": "Company registered successfully"}
             return {"message": "Failed to register company"}
 
         except Exception as e:
             return {"message": "Processing failed", "error": str(e)}
         
-    def get_all(self) -> list[tuple[str, str]]:
-        return self.db_controller.get_all_companies()
-
+    async def get_all(self) -> list[tuple[str, str]]:
+        return await self.db_controller.get_all_companies()
 
     def _str_to_industry(self, industry_str: Optional[str]) -> Industry:
         return self._str_to_enum(Industry, industry_str, Industry.OTHER)
