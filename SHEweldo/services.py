@@ -1,9 +1,9 @@
 from abc import ABC, abstractmethod
 from typing import Dict, Any, Optional, Type
 
-from server.models.entities import SalaryRecord, Company
-from server.controllers.database import DatabaseController, FilterParams
-from server.models.enums import *
+from models.entities import SalaryRecord, Company
+from controllers.database import DatabaseController, FilterParams
+from models.enums import *
 
 class Service(ABC):
     

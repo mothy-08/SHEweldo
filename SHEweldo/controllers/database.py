@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
-from server.models.entities import SalaryRecord, Company
-from server.models.enums import *
+from models.entities import SalaryRecord, Company
+from models.enums import *
 import aiosqlite
 from typing import Any, Dict, List, Tuple, TypedDict, Optional
 

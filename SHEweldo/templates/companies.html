@@ -3,17 +3,17 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="/styles/styles.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='/styles/global.css') }}" />
     <link
       href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
       rel="stylesheet"
     />
-    <title>SHEweldo | Salaries</title>
+    <title>SHEweldo | Companies</title>
   </head>
-  <body>
+  <body class="companies-body font-regular">
     <header class="menubar font-thin">
       <img
-        src="../images/SHEweldo.png"
+        src="{{ url_for('static', filename='images/SHEweldo.png') }}"
         alt="SHEweldo Logo"
         class="small-logo"
       />
@@ -32,5 +32,7 @@
         </button>
       </div>
     </header>
+
+    <main class="companies-main"></main>
   </body>
 </html>

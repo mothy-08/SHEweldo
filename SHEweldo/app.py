@@ -1,14 +1,10 @@
-import os
 import math
-from datetime import date
-from typing import Optional
 
-from quart import Quart, jsonify, request, send_from_directory
+from quart import Quart, jsonify, request, render_template
 
-from server.models.enums import CompanySize, Department, ExperienceLevel, Gender, Industry
-from server.models.entities import Company, SalaryRecord
-from server.services import Service, SalaryService, CompanyService
-from server.controllers.database import FilterParams, IDatabaseController
+from models.enums import Department, ExperienceLevel, Industry
+from services import Service, SalaryService, CompanyService
+from controllers.database import FilterParams
 
 
 class AppAPI:
@@ -16,14 +12,8 @@ class AppAPI:
         self._salary_service = salary_service
         self._company_service = company_service
 
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-        project_dir = os.path.dirname(current_dir)
-        client_dir = os.path.join(project_dir, "client")
-        static_dir = os.path.join(client_dir, "static")
-
         self._app = Quart(__name__)
         self._app.debug = True
-        self._client_dir = client_dir
 
         self._setup_api_routes()
         self._setup_frontend_routes()
@@ -183,26 +173,25 @@ class AppAPI:
                 return jsonify({"error": str(e)}), 500
 
     def _setup_frontend_routes(self):
-        @self._app.route("/", defaults={"path": "index.html"})
-        @self._app.route("/<path:path>")
-        async def serve_frontend(path):
-            return await send_from_directory(self._client_dir, path)
+        @self._app.route("/")
+        async def serve_frontend():
+            return await render_template("index.html")
 
         @self._app.route("/salaries/submit", methods=["GET"])
         async def submit_salary():
-            return await send_from_directory(self._client_dir, "salary-form.html")
+            return await render_template("salary-form.html")
 
         @self._app.route("/companies/add", methods=["GET"])
         async def add_company():
-            return await send_from_directory(self._client_dir, "company-form.html")
+            return await render_template("companies.html")
 
         @self._app.route("/graph/employee", methods=["GET"])
         async def serve_employee_graph():
-            return await send_from_directory(self._client_dir, "employee-charts.html")
+            return await render_template("employee-charts.html")
 
         @self._app.route("/graph/companies/", methods=["GET"])
         async def serve_company_graph():
-            return await send_from_directory(self._client_dir, "company-charts.html")
+            return await render_template("company-charts.html")
 
     def _configure_error_handlers(self):
         @self._app.errorhandler(404)
