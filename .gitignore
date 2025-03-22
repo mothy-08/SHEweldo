@@ -172,4 +172,4 @@ cython_debug/
 
 # Database
 
-*.db
+# *.db
