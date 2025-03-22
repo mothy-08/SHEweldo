@@ -1,5 +1,6 @@
 import hashlib, os
 from abc import ABC, abstractmethod
+from typing import Optional
 from server.models.enums import *
 
 class BaseEntity(ABC):
@@ -21,7 +22,7 @@ class Company(BaseEntity):
         self._industry = industry
         self._country = country.strip()
 
-        entity_id = self.generate_hash()
+        entity_id = self._generate_hash()
         super().__init__(entity_id)
 
     def validate(self) -> bool:
@@ -52,15 +53,14 @@ class Company(BaseEntity):
     def industry(self):
         return self._industry
 
-    def generate_hash(self) -> str:
+    def _generate_hash(self) -> str:
         hash_input = f"{self.name.lower()}{self.country.lower()}".encode()
         return hashlib.sha256(hash_input).hexdigest()
 
 class SalaryRecord(BaseEntity):
     def __init__(self, company_hash: str, experience_level: ExperienceLevel, salary_amount: float, gender: Gender,
                  submission_date: str, is_well_compensated: bool, 
-                 department: Department, job_title: str):
-
+                 department: Department, job_title: str, entity_id: Optional[str] = None):
         self._company_hash = company_hash
         self._experience_level = experience_level
         self._salary_amount = max(0.01, salary_amount)
@@ -70,7 +70,7 @@ class SalaryRecord(BaseEntity):
         self._department = department
         self._job_title = job_title.strip()
 
-        entity_id = self.generate_hash()
+        entity_id = entity_id if entity_id is not None else self._generate_hash()
         super().__init__(entity_id)
 
     def validate(self) -> bool:
@@ -119,7 +119,7 @@ class SalaryRecord(BaseEntity):
     def job_title(self):
         return self._job_title
 
-    def generate_hash(self) -> str:
+    def _generate_hash(self) -> str:
         salt = os.urandom(16).hex()
         hash_input = f"{self.company_hash}{self.salary_amount}{self.submission_date}{salt}".encode()
         return hashlib.sha256(hash_input).hexdigest()
