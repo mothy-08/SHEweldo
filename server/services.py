@@ -133,8 +133,9 @@ class CompanyService(Service):
 
         benchmark_data = self.db_controller.get_benchmark_data(filters, salary_range_step)
         current_average = self.db_controller.get_average_salary(id)
+        pie_graph_data = self.db_controller.get_pie_graph_data(filters)
 
-        return benchmark_data, current_average
+        return benchmark_data, current_average, pie_graph_data
 
 
     def add(self, data: Dict[str, Any]) -> tuple[Dict[str, Any], int]:

@@ -38,9 +38,15 @@
     <div style="width: 80%; margin: 0 auto;">
         <canvas id="barChart"></canvas>
     </div>
+    <div style="width: 50%; margin: 20px auto;">
+        <canvas id="pieChart"></canvas>
+    </div>
+    
 
     <script>
         let barChart = null;
+        let pieChart = null;
+
 
         $(document).ready(async function() {
             $('#companyFilter').select2({
@@ -64,26 +70,21 @@
                 const companies = await response.json();
                 const filter = document.getElementById('companyFilter');
 
-                // Clear existing options (except the default "All Companies")
                 filter.innerHTML = '<option value="">All Companies</option>';
 
-                // Sort companies alphabetically by name
                 companies.sort((a, b) => a.name.localeCompare(b.name));
 
-                // Add sorted companies to the dropdown
                 companies.forEach((company, index) => {
                     const option = document.createElement('option');
                     option.value = company.hash;
                     option.textContent = company.name;
                     filter.appendChild(option);
 
-                    // Set the first company as the default selected option
                     if (index === 0) {
                         option.selected = true;
                     }
                 });
 
-                // Trigger Select2 to update the UI
                 $('#companyFilter').trigger('change.select2');
             } catch (error) {
                 console.error('Error loading companies:', error);
@@ -151,6 +152,7 @@
 
         function updateBarChart(data) {
             if (barChart) barChart.destroy();
+            if (pieChart) pieChart.destroy();
 
             const barData = data.bar_graph;
             const currentAvg = data.current_avg;
@@ -183,7 +185,34 @@
                     }
                 }
             });
+
+            const pieData = data.pie_graph;
+            const compensated = pieData.find(p => p.is_well_compensated === 1)?.count || 0;
+            const notCompensated = pieData.find(p => p.is_well_compensated === 0)?.count || 0;
+
+            const pieCtx = document.getElementById('pieChart').getContext('2d');
+            pieChart = new Chart(pieCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['Well Compensated', 'Not Well Compensated'],
+                    datasets: [{
+                        data: [compensated, notCompensated],
+                        backgroundColor: ['rgba(75, 192, 192, 0.8)', 'rgba(255, 99, 132, 0.8)'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    plugins: {
+                        legend: { position: 'top' },
+                        title: { 
+                            display: true, 
+                            text: `Compensation Distribution (Total: ${compensated + notCompensated})`
+                        }
+                    }
+                }
+            });
         }
+
     </script>
 </body>
 </html>

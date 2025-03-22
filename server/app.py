@@ -124,13 +124,14 @@ class AppAPI:
                     filters["experience_level"] = ExperienceLevel(request.args.get("experience_level").lower())
 
                 if not filters:
-                    bargraph_data, current_average = self._company_service.fetch_filtered_records(range_steps, company_hash)
+                    bargraph_data, current_average, piegraph_data = self._company_service.fetch_filtered_records(range_steps, company_hash)
                 else:
-                    bargraph_data, current_average = self._company_service.fetch_filtered_records(range_steps, filters, company_hash)
+                    bargraph_data, current_average, piegraph_data = self._company_service.fetch_filtered_records(range_steps, filters, company_hash)
 
                 return jsonify({
                     "bar_graph": bargraph_data,
-                    "current_avg": current_average
+                    "current_avg": current_average,
+                    "pie_graph": piegraph_data
                 }), 200
 
             except Exception as e:
