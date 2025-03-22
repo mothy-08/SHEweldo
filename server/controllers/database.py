@@ -32,6 +32,10 @@ class IDatabaseController(ABC):
         pass
 
     @abstractmethod
+    def get_average_salary(self, company_hash: str) -> float:
+        pass
+
+    @abstractmethod
     def get_filtered_records(self, filters: FilterParams) -> list[SalaryRecord]:
         pass
 

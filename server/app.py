@@ -137,10 +137,9 @@ class AppAPI:
                 return jsonify({"error": str(e)}), 500
             
     def _setup_frontend_routes(self):
-        @self._app.route('/', defaults={'path': 'salary_form.html'})  # TODO: Change this to index.html
+        @self._app.route('/', defaults={'path': 'landingPage.html'})
         @self._app.route('/<path:path>')
         def serve_frontend(path):
-            # the landing page make user choose to compare salary or compare company
             return send_from_directory(self._client_dir, path)
 
         @self._app.route("/salaries/submit", methods=["GET"])
