@@ -21,13 +21,18 @@ async function populateCompanies() {
         const response = await fetch('/api/companies');
         const companies = await response.json();
         const filter = document.getElementById('companyFilter');
+        filter.innerHTML = '<option value="">All Companies</option>';
         companies.sort((a, b) => a.name.localeCompare(b.name));
-        companies.forEach(company => {
-            const option = document.createElement('option');
+        companies.forEach((company, index) => {
+            const option = document.createElement("option");
             option.value = company.hash;
             option.textContent = company.name;
             filter.appendChild(option);
-        });
+      
+            if (index === 0) {
+              option.selected = true;
+            }
+          });
         $('#companyFilter').trigger('change.select2');
     } catch (error) {
         console.error('Error loading companies:', error);

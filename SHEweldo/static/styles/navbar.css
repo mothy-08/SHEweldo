@@ -1,0 +1,48 @@
+.menubar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: var(--color-neutral-700);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--spacing-0-5) var(--spacing-1);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+  }
+  
+  .small-logo {
+    height: 50px;
+    width: auto;
+  }
+  
+  .menubar-button-wrapper {
+    display: flex;
+    gap: var(--spacing-1);
+  }
+  
+  .menubar-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-0-5);
+    background-color: transparent;
+    border: none;
+    color: var(--color-neutral-200);
+    font-size: var(--font-size-sm);
+    cursor: pointer;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    transition: background-color 0.3s, color 0.3s;
+  }
+  
+  .menubar-btn:hover,
+  .menubar-btn:focus-visible {
+    background-color: var(--color-accent-700);
+    color: #fff;
+  }
+  
+  .material-symbols-outlined {
+    font-size: var(--font-size-md);
+  }
+  

@@ -240,7 +240,7 @@ if __name__ == "__main__":
 
         config = Config()
         config.bind = ["0.0.0.0:5000"]
-        config.use_reloader = False
+        config.use_reloader = True
 
         await serve(api._app, config)
 

@@ -4,156 +4,72 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Salary Submission Form</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/salary-form.css') }}">
 </head>
 <body>
-    <h2>Salary Submission Form</h2>
-    <form id="salaryForm">
-        <div>
-            <label for="companyFilter">Company:</label>
-            <select id="companyFilter" name="company_hash" style="width: 200px;">
-                <option value="">All Companies</option>
-            </select>
-            <button type="button" id="addCompanyBtn">Add Company</button>
-        </div>
+    <div class="form-container">
+        <h2>Salary Submission Form</h2>
+        <form id="salaryForm">
+            <div class="form-field">
+                <label for="companyFilter">Company:</label>
+                <select id="companyFilter" name="company_hash">
+                    <option value="">All Companies</option>
+                </select>
+                <button type="button" id="addCompanyBtn">Add Company</button>
+            </div>
 
-        <label for="years_at_the_company">Years at Company:</label>
-        <input type="number" id="years_at_the_company" name="years_at_the_company" required><br><br>
+            <div class="form-field">
+                <label for="years_at_the_company">Years at Company:</label>
+                <input type="number" id="years_at_the_company" name="years_at_the_company" required>
+            </div>
 
-        <label for="total_experience">Total Experience:</label>
-        <input type="number" id="total_experience" name="total_experience" required><br><br>
+            <div class="form-field">
+                <label for="total_experience">Total Experience:</label>
+                <input type="number" id="total_experience" name="total_experience" required>
+            </div>
 
-        <label for="salary_amount">Salary Amount:</label>
-        <input type="number" id="salary_amount" name="salary_amount" required><br><br>
+            <div class="form-field">
+                <label for="salary_amount">Salary Amount:</label>
+                <input type="number" id="salary_amount" name="salary_amount" required>
+            </div>
 
-        <label for="gender">Gender:</label>
-        <select id="gender" name="gender">
-            <option value="" selected disabled>Select</option>
-            <option value="Male">Male</option>
-            <option value="Female">Female</option>
-            <option value="Other">Other</option>
-        </select><br><br>
+            <div class="form-field">
+                <label for="gender">Gender:</label>
+                <select id="gender" name="gender">
+                    <option value="" selected disabled>Select</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
 
-        <label for="is_well_compensated">Is Well Compensated:</label>
-        <select id="is_well_compensated" name="is_well_compensated">
-            <option value="" selected disabled>Select</option>
-            <option value="true">Yes</option>
-            <option value="false">No</option>
-        </select><br><br>
+            <div class="form-field">
+                <label for="is_well_compensated">Is Well Compensated:</label>
+                <select id="is_well_compensated" name="is_well_compensated">
+                    <option value="" selected disabled>Select</option>
+                    <option value="true">Yes</option>
+                    <option value="false">No</option>
+                </select>
+            </div>
 
-        <label for="department">Department</label>
-        <div>
-            <select id="department" style="width: 200px;">
-                <option value="">All Departments</option>
-            </select>
-        </div>
+            <div class="form-field">
+                <label for="department">Department:</label>
+                <select id="department">
+                    <option value="">All Departments</option>
+                </select>
+            </div>
 
-        <label for="job_title">Job Title:</label>
-        <input type="text" id="job_title" name="job_title" required><br><br>
+            <div class="form-field">
+                <label for="job_title">Job Title:</label>
+                <input type="text" id="job_title" name="job_title" required>
+            </div>
 
-        <button type="submit">Submit</button>
-    </form>
+            <button type="submit">Submit</button>
+        </form>
 
-    <div id="message" style="display: none; padding: 10px; margin-top: 20px; border-radius: 5px;"></div>
+        <div id="message" style="display: none;"></div>
+    </div>
 
-    <script>
-        async function populateCompanies() {
-            try {
-                const response = await fetch('/api/companies');
-                const companies = await response.json();
-                const filter = document.getElementById('companyFilter');
-                
-                filter.innerHTML = '<option value="">All Companies</option>';
-
-                companies.sort((a, b) => a.name.localeCompare(b.name));
-                companies.forEach(company => {
-                    const option = document.createElement('option');
-                    option.value = company.hash;
-                    option.textContent = company.name;
-                    filter.appendChild(option);
-                });
-            } catch (error) {
-                console.error('Error loading companies:', error);
-            }
-        }
-
-        function populateDepartments() {
-            const departments = ['executive_leadership','operations','finance_accounting','human_resources',
-                'legal_compliance','marketing_sales','customer_service_support','technology_it','product_rd',
-                'supply_chain_logistics','other'];
-            const filter = document.getElementById('departmentFilter');
-            departments.forEach(dept => {
-                const option = document.createElement('option');
-                option.value = dept;
-                option.textContent = dept.split('_').map(word => word[0].toUpperCase() + word.slice(1)).join(' ');
-                filter.appendChild(option);
-            });
-        }
-
-        document.addEventListener('DOMContentLoaded', populateDepartments);
-
-        document.addEventListener('DOMContentLoaded', populateCompanies);
-
-        document.getElementById('addCompanyBtn').addEventListener('click', () => {
-            window.location.href = '/companies/add';
-        });
-
-        document.getElementById('salaryForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            const formData = {
-                company_hash: document.getElementById('companyFilter').value,
-                years_at_the_company: parseInt(document.getElementById('years_at_the_company').value),
-                total_experience: parseInt(document.getElementById('total_experience').value),
-                salary_amount: parseFloat(document.getElementById('salary_amount').value),
-                gender: document.getElementById('gender').value,
-                submission_date: new Date().toISOString().split('T')[0],
-                is_well_compensated: document.getElementById('is_well_compensated').value === "true",
-                department: document.getElementById('department').value,
-                job_title: document.getElementById('job_title').value
-            };
-
-            try {
-                const response = await fetch('/api/salaries/submit', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(formData)
-                });
-
-                const result = await response.json();
-                const messageDiv = document.getElementById('message');
-
-                if (response.ok) {
-                    messageDiv.style.display = 'block';
-                    messageDiv.style.backgroundColor = '#d4edda';
-                    messageDiv.style.color = '#155724';
-                    messageDiv.textContent = 'Submission successful! Thank you for your contribution.';
-                    document.getElementById('salaryForm').reset();
-
-                    setTimeout(() => {
-                        window.location.href = '/graph/employee';
-                    }, 500);
-                } else {
-                    messageDiv.style.display = 'block';
-                    messageDiv.style.backgroundColor = '#f8d7da';
-                    messageDiv.style.color = '#721c24';
-                    messageDiv.textContent = result.error || 'Error submitting salary data';
-                }
-
-                setTimeout(() => {
-                    messageDiv.style.display = 'none';
-                }, 5000);
-
-            } catch (error) {
-                console.error('Error:', error);
-                const messageDiv = document.getElementById('message');
-                messageDiv.style.display = 'block';
-                messageDiv.style.backgroundColor = '#f8d7da';
-                messageDiv.style.color = '#721c24';
-                messageDiv.textContent = 'Network error - please try again later.';
-            }
-        });
-    </script>
+    <script src="{{ url_for('static', filename='/js/salary-form.js') }}" defer></script>
 </body>
 </html>

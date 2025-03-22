@@ -1,0 +1,121 @@
+@import url("https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&display=swap");
+
+:root {
+  --color-background: rgb(14, 17, 22);
+  --color-primary: rgb(218, 176, 232);
+  --color-accent-700: rgb(196, 118, 222);
+  --color-accent-400: rgb(167, 106, 187);
+  --color-neutral-700: rgb(59, 59, 60);
+  --color-neutral-300: rgb(240, 239, 252);
+  --color-neutral-200: rgb(224, 223, 248);
+  --font-size-sm: 0.875rem;
+  --font-size-md: 1rem;
+  --font-size-lg: 1.25rem;
+  --spacing-0-5: 0.5rem;
+  --spacing-1: 1rem;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font: inherit;
+}
+
+body {
+  background-color: var(--color-background);
+  font-family: "Lexend", sans-serif;
+  color: var(--color-neutral-300);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: var(--spacing-1);
+}
+
+.form-container {
+  background-color: var(--color-neutral-700);
+  padding: var(--spacing-1);
+  border-radius: 0.5rem;
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Center content horizontally */
+  gap: 0.75rem;
+}
+
+h2 {
+  font-size: var(--font-size-lg);
+  color: var(--color-primary);
+  background: -webkit-linear-gradient(var(--color-primary), var(--color-accent-700));
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 0.5rem;
+  text-align: center; /* Center text horizontally */
+  width: 100%; /* Ensure it takes full width */
+}
+
+.form-field {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%; /* Ensure form fields take full width */
+}
+
+.form-field label {
+  font-size: var(--font-size-sm);
+  color: var(--color-neutral-300);
+  width: 120px;
+  text-align: right;
+}
+
+.form-field input,
+.form-field select {
+  flex: 1;
+  padding: 0.25rem;
+  border: 1px solid var(--color-accent-400);
+  border-radius: 0.25rem;
+  background-color: var(--color-neutral-700);
+  color: var(--color-neutral-300);
+  font-size: var(--font-size-sm);
+}
+
+.form-field input:focus,
+.form-field select:focus {
+  outline: none;
+  border-color: var(--color-accent-700);
+}
+
+#salaryForm button {
+  background-color: var(--color-accent-400);
+  border: none;
+  border-radius: 0.25rem;
+  color: var(--color-neutral-300);
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  padding: 0.25rem 0.5rem;
+  transition: opacity 0.3s;
+  width: 100%; /* Make button full width */
+}
+
+#salaryForm button:hover {
+  opacity: 0.65;
+}
+
+#addCompanyBtn {
+  background-color: var(--color-neutral-300);
+  color: var(--color-neutral-700);
+  margin-left: 0.25rem;
+}
+
+#message {
+  background-color: var(--color-neutral-700);
+  color: var(--color-neutral-300);
+  font-size: var(--font-size-sm);
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+}
