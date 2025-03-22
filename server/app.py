@@ -11,7 +11,7 @@ from server.services import Service, SalaryService, CompanyService
 from controllers.database import FilterParams, IDatabaseController
 
 class AppAPI:
-    def __init__(self,salary_service: Service, company_service: Service):
+    def __init__(self, salary_service: Service, company_service: Service):
         self._salary_service = salary_service
         self._company_service = company_service
 
@@ -29,10 +29,10 @@ class AppAPI:
 
     def _setup_api_routes(self):
         @self._app.route("/api/salaries/submit", methods=["POST"])
-        def post_salary():
+        async def post_salary():
             try:
                 data = request.get_json()
-                response_data = self._salary_service.add(data)
+                response_data = await self._salary_service.add(data)  # Await the async method
 
                 if response_data.get("error"):
                     return jsonify(response_data), 500
@@ -53,10 +53,10 @@ class AppAPI:
                 return jsonify({"error": "Server error"}), 500
             
         @self._app.route("/api/companies/add", methods=["POST"])
-        def post_company():
+        async def post_company():
             try:
                 data = request.get_json()
-                response = self._company_service.add(data)
+                response = await self._company_service.add(data)  # Await the async method
                 if response.get("error"):
                     return jsonify(response), 500
                 return jsonify(response), 201
@@ -66,7 +66,7 @@ class AppAPI:
                 return jsonify({"error": "Server error"}), 500
             
         @self._app.route("/api/graphs/employee", methods=["GET"])
-        def get_graphs():
+        async def get_graphs():
             try:
                 filters: FilterParams = {}
 
@@ -86,9 +86,9 @@ class AppAPI:
                     filters["experience_level"] = ExperienceLevel(request.args.get("experience_level").lower())
 
                 if not filters:
-                    bargraph_data, piegraph_data = self._salary_service.fetch_filtered_records(range_steps, salary_id)
+                    bargraph_data, piegraph_data = await self._salary_service.fetch_filtered_records(range_steps, salary_id)  # Await the async method
                 else:
-                    bargraph_data, piegraph_data = self._salary_service.fetch_filtered_records(range_steps, filters)
+                    bargraph_data, piegraph_data = await self._salary_service.fetch_filtered_records(range_steps, filters)  # Await the async method
 
                 return jsonify({
                     "bar_graph": bargraph_data,
@@ -100,15 +100,15 @@ class AppAPI:
                 return jsonify({"error": str(e)}), 500
 
         @self._app.route("/api/companies", methods=["GET"])
-        def get_companies():
+        async def get_companies():
             try:
-                companies = self._company_service.get_all()
+                companies = await self._company_service.get_all()  # Await the async method
                 return jsonify([{"name": name, "hash": hash} for name, hash in companies]), 200
             except Exception as e:
                 return jsonify({"error": str(e)}), 500
 
         @self._app.route("/api/companies/<string:company_hash>", methods=["GET"])
-        def get_benchmark(company_hash: str):
+        async def get_benchmark(company_hash: str):
             try:
                 filters: FilterParams = {}
 
@@ -124,10 +124,12 @@ class AppAPI:
                     filters["experience_level"] = ExperienceLevel(request.args.get("experience_level").lower())
 
                 if not filters:
-                    bargraph_data, current_average, piegraph_data = self._company_service.fetch_filtered_records(range_steps, company_hash)
+                    bargraph_data, current_average, piegraph_data = await self._company_service.fetch_filtered_records(salary_range_step=range_steps, id=company_hash)  # Await the async method
                 else:
-                    bargraph_data, current_average, piegraph_data = self._company_service.fetch_filtered_records(range_steps, filters, company_hash)
-
+                    bargraph_data, current_average, piegraph_data = await self._company_service.fetch_filtered_records(salary_range_step=range_steps, filters=filters, id=company_hash)  # Await the async method
+                
+                print(bargraph_data, current_average, piegraph_data)
+                
                 return jsonify({
                     "bar_graph": bargraph_data,
                     "current_avg": current_average,
@@ -171,11 +173,23 @@ class AppAPI:
     def run(self, host: str = "0.0.0.0", port: int = 5000, debug: bool = False):
         self._app.run(host=host, port=port, debug=debug)
 
+import asyncio
+
 if __name__ == "__main__":
     from server.services import SalaryService, CompanyService
     
-    salary_service = SalaryService()
-    company_service = CompanyService()
+    async def main():
+        # Initialize services
+        salary_service = SalaryService()
+        company_service = CompanyService()
+        
+        # Initialize the database connection
+        await salary_service.initialize()
+        await company_service.initialize()
+        
+        # Create and run the API
+        api = AppAPI(salary_service, company_service)
+        api.run(debug=True)
     
-    api = AppAPI(salary_service, company_service)
-    api.run(debug=True)
+    # Run the async main function
+    asyncio.run(main())
