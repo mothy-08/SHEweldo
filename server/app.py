@@ -4,12 +4,11 @@ from datetime import date
 from typing import Optional
 
 from quart import Quart, jsonify, request, send_from_directory
-from quart_cors import cors
 
-from models.enums import CompanySize, Department, ExperienceLevel, Gender, Industry
-from models.entities import Company, SalaryRecord
+from server.models.enums import CompanySize, Department, ExperienceLevel, Gender, Industry
+from server.models.entities import Company, SalaryRecord
 from server.services import Service, SalaryService, CompanyService
-from controllers.database import FilterParams, IDatabaseController
+from server.controllers.database import FilterParams, IDatabaseController
 
 
 class AppAPI:
@@ -24,7 +23,6 @@ class AppAPI:
 
         self._app = Quart(__name__)
         self._app.debug = True
-        self._app = cors(self._app, allow_origin="*")
         self._client_dir = client_dir
 
         self._setup_api_routes()
@@ -247,7 +245,7 @@ if __name__ == "__main__":
 
         config = Config()
         config.bind = ["0.0.0.0:5000"]
-        config.use_reloader = True
+        config.use_reloader = False
 
         await serve(api._app, config)
 
