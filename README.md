@@ -186,3 +186,6 @@ SHEweldo is designed to serve a diverse range of users:
 
 ### <a name="ack"></a>
 ## 🩷 Acknowledgement
+The team would like to acknowledge and extend gratitude to our professor, Ms. Fatima Marie Agdon, MSCS. Her dedication in guiding us throughout the development of the activity has immensely helped us achieve our goals.
+
+
