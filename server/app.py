@@ -183,26 +183,26 @@ class AppAPI:
                 return jsonify({"error": str(e)}), 500
 
     def _setup_frontend_routes(self):
-        @self._app.route("/", defaults={"path": "landingPage.html"})
+        @self._app.route("/", defaults={"path": "index.html"})
         @self._app.route("/<path:path>")
         async def serve_frontend(path):
             return await send_from_directory(self._client_dir, path)
 
         @self._app.route("/salaries/submit", methods=["GET"])
         async def submit_salary():
-            return await send_from_directory(self._client_dir, "salary_form.html")
+            return await send_from_directory(self._client_dir, "salary-form.html")
 
         @self._app.route("/companies/add", methods=["GET"])
         async def add_company():
-            return await send_from_directory(self._client_dir, "company_form.html")
+            return await send_from_directory(self._client_dir, "company-form.html")
 
         @self._app.route("/graph/employee", methods=["GET"])
         async def serve_employee_graph():
-            return await send_from_directory(self._client_dir, "employee_graph.html")
+            return await send_from_directory(self._client_dir, "employee-charts.html")
 
         @self._app.route("/graph/companies/", methods=["GET"])
         async def serve_company_graph():
-            return await send_from_directory(self._client_dir, "company_graph.html")
+            return await send_from_directory(self._client_dir, "company-charts.html")
 
     def _configure_error_handlers(self):
         @self._app.errorhandler(404)
