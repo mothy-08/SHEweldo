@@ -26,6 +26,15 @@
                 </select>
             </div>
             <div>
+                <select id="rangeStepFilter" style="width: 200px;">
+                    <option value="">Select Range Step</option>
+                    <option value="10">10</option>
+                    <option value="100">100</option>
+                    <option value="1000">1000</option>
+                    <option value="10000">10000</option>
+                </select>
+            </div>
+            <div>
                 <button id="applyFilters" style="padding: 5px 15px; cursor: pointer;">Apply Filters</button>
             </div>
         </div>
@@ -102,7 +111,8 @@
                 const filters = {
                     company_hash: $('#companyFilter').val(),
                     department: $('#departmentFilter').val(),
-                    experience_level: $('#experienceLevelFilter').val()
+                    experience_level: $('#experienceLevelFilter').val(),
+                    range_steps: $('#rangeStepFilter').val()
                 };
 
                 const filteredParams = Object.fromEntries(
