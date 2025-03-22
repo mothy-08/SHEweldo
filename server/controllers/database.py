@@ -56,7 +56,7 @@ class DatabaseController(IDatabaseController):
         """Establish an asynchronous connection to the database."""
         try:
             self._connection = await aiosqlite.connect(self._db_name)
-            await self._create_tables()  # Ensure tables are created after connection
+            await self._create_tables()
             print("Database connection established successfully.")
         except Exception as e:
             print(f"Failed to connect to the database: {e}")

@@ -32,7 +32,7 @@ class AppAPI:
         async def post_salary():
             try:
                 data = request.get_json()
-                response_data = await self._salary_service.add(data)  # Await the async method
+                response_data = await self._salary_service.add(data)
 
                 if response_data.get("error"):
                     return jsonify(response_data), 500
@@ -56,7 +56,7 @@ class AppAPI:
         async def post_company():
             try:
                 data = request.get_json()
-                response = await self._company_service.add(data)  # Await the async method
+                response = await self._company_service.add(data)
                 if response.get("error"):
                     return jsonify(response), 500
                 return jsonify(response), 201
@@ -86,9 +86,8 @@ class AppAPI:
                     filters["experience_level"] = ExperienceLevel(request.args.get("experience_level").lower())
 
                 if not filters:
-                    bargraph_data, piegraph_data = await self._salary_service.fetch_filtered_records(range_steps, salary_id)  # Await the async method
-                else:
-                    bargraph_data, piegraph_data = await self._salary_service.fetch_filtered_records(range_steps, filters)  # Await the async method
+                    bargraph_data, piegraph_data = await self._salary_service.fetch_filtered_records(range_steps, salary_id)
+                    bargraph_data, piegraph_data = await self._salary_service.fetch_filtered_records(range_steps, filters)
 
                 return jsonify({
                     "bar_graph": bargraph_data,
@@ -102,7 +101,7 @@ class AppAPI:
         @self._app.route("/api/companies", methods=["GET"])
         async def get_companies():
             try:
-                companies = await self._company_service.get_all()  # Await the async method
+                companies = await self._company_service.get_all()
                 return jsonify([{"name": name, "hash": hash} for name, hash in companies]), 200
             except Exception as e:
                 return jsonify({"error": str(e)}), 500
@@ -124,9 +123,9 @@ class AppAPI:
                     filters["experience_level"] = ExperienceLevel(request.args.get("experience_level").lower())
 
                 if not filters:
-                    bargraph_data, current_average, piegraph_data = await self._company_service.fetch_filtered_records(salary_range_step=range_steps, id=company_hash)  # Await the async method
+                    bargraph_data, current_average, piegraph_data = await self._company_service.fetch_filtered_records(salary_range_step=range_steps, id=company_hash)
                 else:
-                    bargraph_data, current_average, piegraph_data = await self._company_service.fetch_filtered_records(salary_range_step=range_steps, filters=filters, id=company_hash)  # Await the async method
+                    bargraph_data, current_average, piegraph_data = await self._company_service.fetch_filtered_records(salary_range_step=range_steps, filters=filters, id=company_hash) 
                 
                 print(bargraph_data, current_average, piegraph_data)
                 
@@ -179,17 +178,13 @@ if __name__ == "__main__":
     from server.services import SalaryService, CompanyService
     
     async def main():
-        # Initialize services
         salary_service = SalaryService()
         company_service = CompanyService()
         
-        # Initialize the database connection
         await salary_service.initialize()
         await company_service.initialize()
         
-        # Create and run the API
         api = AppAPI(salary_service, company_service)
         api.run(debug=True)
     
-    # Run the async main function
     asyncio.run(main())
