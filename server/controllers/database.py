@@ -49,11 +49,9 @@ class DatabaseController(IDatabaseController):
         self._connection = None
 
     async def initialize(self):
-        """Initialize the database connection."""
         await self._connect()
 
     async def _connect(self):
-        """Establish an asynchronous connection to the database."""
         try:
             self._connection = await aiosqlite.connect(self._db_name)
             await self._create_tables()

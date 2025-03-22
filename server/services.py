@@ -6,26 +6,14 @@ from server.controllers.database import DatabaseController, FilterParams
 from server.models.enums import *
 
 class Service(ABC):
-    """Base class for application services providing common utilities."""
     
     def __init__(self):
         self.db_controller = DatabaseController()
 
     async def initialize(self):
-        """Initialize the database connection."""
         await self.db_controller.initialize()
 
     def _str_to_enum(self, enum_cls: Type[StrEnum], value_str: Optional[str], default: StrEnum) -> StrEnum:
-        """Converts a string to an enum member using case-insensitive comparison.
-        
-        Args:
-            enum_cls: The Enum class to convert to
-            value_str: Input string to match against enum members
-            default: Default value if no match found
-            
-        Returns:
-            Matched enum member or default value
-        """
         if not value_str:
             return default
             
@@ -70,7 +58,6 @@ class SalaryService(Service):
         super().__init__()
 
     async def add(self, data: Dict[str, Any]) -> tuple[Dict[str, Any], int]:
-        """Process and validate a new salary record submission."""
         try:
             if not (company_hash := data.get("company_hash")):
                 return {"message": "Missing company identifier"}
@@ -107,7 +94,6 @@ class SalaryService(Service):
         return await self.db_controller.get_all_companies()
 
     def _merge_experience(self, years_at_company: int, total_experience: int) -> ExperienceLevel:
-        """Determine experience level using weighted combination of experience metrics."""
         weighted = (years_at_company * 1.5) + total_experience
         for threshold, level in self._EXP_THRESHOLDS:
             if weighted < threshold:
