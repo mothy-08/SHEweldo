@@ -5,11 +5,11 @@ from server.models.entities import SalaryRecord, Company
 from server.controllers.database import DatabaseController, FilterParams
 from server.models.enums import *
 
-class IService(ABC):
+class Service(ABC):
     """Base class for application services providing common utilities."""
     
-    def __init__(self, db_controller: DatabaseController):
-        self.db_controller = db_controller
+    def __init__(self):
+        self.db_controller = DatabaseController()
 
     def _str_to_enum(self, enum_cls: Type[StrEnum], value_str: Optional[str], default: StrEnum) -> StrEnum:
         """Converts a string to an enum member using case-insensitive comparison.
@@ -28,17 +28,31 @@ class IService(ABC):
         normalized = value_str.strip().upper().replace(" ", "_")
         return next((e for e in enum_cls if e.name == normalized), default)
     
-    def fetch_filtered_records(self, filters: FilterParams, salary_range_step: int):
+    def fetch_filtered_records(self, salary_range_step: int, filters: FilterParams = None, id: str = None):
+        if filters is None and id is None:
+            raise ValueError("Either 'filters' or 'id' must be provided.")
+
+        if id:
+            filters = FilterParams()
+            salary_record = self.db_controller.get_salary_record(id)
+            filters["company_hash"] = salary_record.company_hash
+            filters["department"] = Department(salary_record.department)
+            filters["experience"] = ExperienceLevel(salary_record.experience_level)
+
         bargraph_data = self.db_controller.get_bar_graph_data(filters, salary_range_step)
         piegraph_data = self.db_controller.get_pie_graph_data(filters)
 
         return bargraph_data, piegraph_data
-    
+
     @abstractmethod
     def add(self, data: Dict[str, Any]) -> tuple[Dict[str, Any], int]:
         pass
 
-class SalaryService(IService):
+    @abstractmethod
+    def get_all(self) -> list[tuple[str, str]]:
+        pass
+
+class SalaryService(Service):
     _EXP_THRESHOLDS = (
         (2, ExperienceLevel.ENTRY_LEVEL),
         (5, ExperienceLevel.JUNIOR),
@@ -48,8 +62,8 @@ class SalaryService(IService):
         (float('inf'), ExperienceLevel.LEGENDARY)
     )
 
-    def __init__(self, db_controller: DatabaseController):
-        super().__init__(db_controller)
+    def __init__(self):
+        super().__init__()
 
     def add(self, data: Dict[str, Any]) -> tuple[Dict[str, Any], int]:
         """Process and validate a new salary record submission."""
@@ -78,12 +92,15 @@ class SalaryService(IService):
                 return {"message": "Invalid salary data", "data": data}
             
             if self.db_controller.insert_salary_record(salary_record):
-                return {"message": "Salary submitted successfully"}
+                return {"message": "Salary submitted successfully", "id": salary_record.id, "salary": salary_record.salary_amount}
     
             return {"message": "Failed to save salary record"}
 
         except Exception as e:
             return {"message": "Processing failed", "error": str(e)}
+        
+    def get_all(self) -> list[tuple[str, str]]:
+        pass
 
     def _merge_experience(self, years_at_company: int, total_experience: int) -> ExperienceLevel:
         """Determine experience level using weighted combination of experience metrics."""
@@ -99,7 +116,7 @@ class SalaryService(IService):
     def _str_to_department(self, department_str: Optional[str]) -> Department:
         return self._str_to_enum(Department, department_str, Department.OTHER)
 
-class CompanyService(IService):
+class CompanyService(Service):
     _SIZE_THRESHOLDS = (
         (50, CompanySize.SMALL),
         (200, CompanySize.MEDIUM),
@@ -107,8 +124,18 @@ class CompanyService(IService):
         (float('inf'), CompanySize.ENTERPRISE)
     )
 
-    def __init__(self, db_controller: DatabaseController):
-        super().__init__(db_controller)
+    def __init__(self):
+        super().__init__()
+
+    def fetch_filtered_records(self, salary_range_step: int, filters: FilterParams = None, id: str = None):
+        if filters is None and id is None:
+            raise ValueError("Either 'filters' or 'id' must be provided.")
+
+        benchmark_data = self.db_controller.get_benchmark_data(filters, salary_range_step)
+        current_average = self.db_controller.get_average_salary(id)
+
+        return benchmark_data, current_average
+
 
     def add(self, data: Dict[str, Any]) -> tuple[Dict[str, Any], int]:
         try:
@@ -135,6 +162,10 @@ class CompanyService(IService):
 
         except Exception as e:
             return {"message": "Processing failed", "error": str(e)}
+        
+    def get_all(self) -> list[tuple[str, str]]:
+        return self.db_controller.get_all_companies()
+
 
     def _str_to_industry(self, industry_str: Optional[str]) -> Industry:
         return self._str_to_enum(Industry, industry_str, Industry.OTHER)
