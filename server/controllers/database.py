@@ -231,7 +231,7 @@ class DatabaseController(IDatabaseController):
             SELECT FLOOR(avg_salary / ?) * ? AS range_start, COUNT(*) AS count
             FROM company_avg_salaries
             GROUP BY range_start
-            ORDER BY range_start
+            ORDER BY range_start DESC
         """
         params = [range_step, range_step] + params
         cursor = await self._connection.cursor()
