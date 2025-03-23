@@ -208,11 +208,27 @@ class AppAPI:
     def _configure_error_handlers(self):
         @self._app.errorhandler(404)
         async def not_found(error):
-            return jsonify({"error": "Resource not found"}), 404
+            return await render_template(
+                "error.html",
+                error_code="404",
+                error_message="Oops! The page you're looking for doesn't exist."
+            ), 404
+
+        @self._app.errorhandler(500)
+        async def internal_server_error(error):
+            return await render_template(
+                "error.html",
+                error_code="500",
+                error_message="Something went wrong on our end. Please try again later."
+            ), 500
 
         @self._app.errorhandler(405)
         async def method_not_allowed(error):
-            return jsonify({"error": "Method not allowed"}), 405
+            return await render_template(
+                "error.html",
+                error_code="405",
+                error_message="This method is not allowed for the requested resource."
+            ), 405
 
     def run(self, host: str = "0.0.0.0", port: int = 5000, debug: bool = False):
         self._app.run(host=host, port=port, debug=debug)
