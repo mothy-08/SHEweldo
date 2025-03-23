@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Company Data Visualization</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='styles/charts.css') }}"
+    />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+  </head>
+
+  <body class="font-regular">
+    <header class="font-bold">
+      <nav>
+        <!-- Logo -->
+        <a href="/">
+          <img
+            src="{{ url_for('static', filename='images/SHEweldo Logo Violet.svg') }}"
+            alt="SHEweldo Logo"
+            class="logo"
+          />
+        </a>
+
+        <!-- Navigation Links -->
+        <ul class="nav-links">
+          <li>
+            <a class="nav-a" href="/graph/companies/" target="_blank">Home</a>
+          </li>
+          <li>
+            <!-- Handle active state in JS later -->
+            <a class="nav-a active" href="/graph/companies/" target="_blank"
+              >Company Benchmark</a
+            >
+          </li>
+          <li>
+            <a class="nav-a" href="/salaries/submit" target="_blank"
+              >Compare Salaries</a
+            >
+          </li>
+        </ul>
+      </nav>
+
+      <div class="line"></div>
+    </header>
+
+    <main>
+      <section class="heading-wrapper">
+        <h1 class="title font-bold">Benchmark of Companies</h1>
+        <p class="subtitle">Hello there, here's what you need to know.</p>
+      </section>
+
+      <section class="pie-chart-wrapper">
+        <canvas id="pieChart"></canvas>
+
+        <div class="title-and-legends-wrapper">
+          <p>Compensation<br />Distribution</p>
+
+          <div class="pie-chart-legends">
+            <div class="legend">
+              <div class="color-circle"></div>
+              <p>Well Compensated</p>
+            </div>
+
+            <div class="legend">
+              <div class="color-circle poorly"></div>
+              <p>Poorly Compensated</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="bar-chart-wrapper">
+        <canvas id="barChart"></canvas>
+      </section>
+
+      <section class="filter-wrapper">
+        <div class="column">
+          <div>
+            <p>Select company:</p>
+            <select id="companyFilter" class="filter-select">
+              <option value="">All Companies</option>
+            </select>
+          </div>
+
+          <div>
+            <p>Select department:</p>
+            <select id="departmentFilter" class="filter-select">
+              <option value="">All Departments</option>
+            </select>
+          </div>
+
+          <div>
+            <p>Select experience:</p>
+            <select id="experienceLevelFilter" class="filter-select">
+              <option value="">All Exp Levels</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="column">
+          <div>
+            <p>Select industry:</p>
+            <select id="industryFilter" class="filter-select">
+              <option value="">All Industries</option>
+            </select>
+          </div>
+
+          <div>
+            <p>Select gender:</p>
+            <select id="genderFilter" class="filter-select">
+              <option value="">All Gender</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div>
+            <p>Select range step:</p>
+            <select id="rangeStepFilter" class="filter-select">
+              <option value="">Select Range Step</option>
+              <option value="10">10</option>
+              <option value="100">100</option>
+              <option value="1000">1000</option>
+              <option value="10000">10000</option>
+            </select>
+          </div>
+        </div>
+
+        <button id="applyFilters" class="apply-button btn">
+          Apply Filters
+        </button>
+      </section>
+
+      <section class="add-companies-wrapper">
+        <p>Can't find what you're looking for?</p>
+        <a href="" class="button-wrapper">
+          <span class="material-symbols-outlined"> add_circle </span>
+          <button class="add-companies-button btn">Add Companies</button>
+        </a>
+      </section>
+    </main>
+
+    <script
+      src="{{ url_for('static', filename='js/company-charts.js') }}"
+      defer
+    ></script>
+  </body>
+</html>
