@@ -1,5 +1,8 @@
+import asyncio
 import math
 import sys
+import logging
+
 
 sys.path.append(".")
 
@@ -228,23 +231,46 @@ async def main():
 
 
 if __name__ == "__main__":
+    import logging
+    import os
     import asyncio
-    from hypercorn.asyncio import serve
     from hypercorn.config import Config
+    from hypercorn.asyncio import serve
 
-    async def run_app():
+    log_file = os.path.abspath("app.log")
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        handlers=[
+            logging.FileHandler(log_file),
+            logging.StreamHandler()
+        ]
+    )
+    logger = logging.getLogger(__name__)
+    logger.info("===== Application Starting =====")
+
+    async def setup_app():
+        from SHEweldo.services import SalaryService, CompanyService
+        
         salary_service = SalaryService()
         company_service = CompanyService()
-
         await salary_service.initialize()
         await company_service.initialize()
-
+        
+        from SHEweldo.app import AppAPI
         api = AppAPI(salary_service, company_service)
+        return api._app
 
-        config = Config()
-        config.bind = ["0.0.0.0:5000"]
-        config.use_reloader = True
+    config = Config()
+    config.bind = ["0.0.0.0:5000"]
+    config.use_reloader = True
+    config.loglevel = "info"
+    config.logconfig = None
 
-        await serve(api._app, config)
-
-    asyncio.run(run_app())
+    try:
+        logger.info(f"Log file location: {log_file}")
+        app = asyncio.run(setup_app())
+        asyncio.run(serve(app, config))
+    except Exception as e:
+        logger.exception("Server failed to start")
+        raise
