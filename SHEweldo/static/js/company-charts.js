@@ -3,8 +3,8 @@ let pieChart = null;
 
 $(document).ready(async function () {
   $("#companyFilter").select2({
-    placeholder: "Choose company...",
-    allowClear: true,
+    // placeholder: "Choose company...",
+    // allowClear: true,
     minimumResultsForSearch: -1,
   });
 
@@ -31,6 +31,7 @@ async function populateCompanies() {
       const option = document.createElement("option");
       option.value = company.hash;
       option.textContent = company.name;
+      option.style.color = "white";
       filter.appendChild(option);
 
       if (index === 0) {
@@ -116,7 +117,7 @@ async function fetchData() {
       department: $("#departmentFilter").val(),
       experience_level: $("#experienceLevelFilter").val(),
       industry: $("#industryFilter").val(),
-      gender: $('#genderFilter').val(),
+      gender: $("#genderFilter").val(),
       range_steps: $("#rangeStepFilter").val(),
     };
 
@@ -158,20 +159,20 @@ function updateBarChart(data) {
           label: "Count",
           data: counts,
           backgroundColor: counts.map((_, index) =>
-            index === highlightIndex
-              ? "rgba(255, 99, 132, 0.8)"
-              : "rgba(54, 162, 235, 0.8)"
+            index === highlightIndex ? "#7b63b8 " : "#4b4b4b"
           ),
-          borderColor: "rgba(75, 75, 75, 1)",
-          borderWidth: 1,
+          borderWidth: 0,
         },
       ],
     },
     options: {
       scales: {
-        y: { beginAtZero: true, title: { display: true, text: "Count" } },
+        y: {
+          beginAtZero: true,
+          title: { display: true, text: "No. of people" },
+        },
         x: {
-          title: { display: true, text: "Range Start" },
+          title: { display: true, text: "Salary Range" },
           ticks: { autoSkip: false, maxRotation: 90, minRotation: 90 },
         },
       },
@@ -192,27 +193,25 @@ function updateBarChart(data) {
   pieChart = new Chart(pieCtx, {
     type: "pie",
     data: {
-      labels: ["Well Compensated", "Not Well Compensated"],
+      labels: ["Well Compensated", "Poorly Compensated"],
       datasets: [
         {
           data: [compensated, notCompensated],
-          backgroundColor: [
-            "rgba(75, 192, 192, 0.8)",
-            "rgba(255, 99, 132, 0.8)",
-          ],
-          borderWidth: 1,
+          backgroundColor: ["#7b63b8", "#4b4b4b"],
+          borderWidth: 0,
         },
       ],
     },
     options: {
       plugins: {
-        legend: { position: "top" },
-        title: {
-          display: true,
-          text: `Compensation Distribution (Total: ${
-            compensated + notCompensated
-          })`,
+        legend: {
+          display: false,
         },
+        title: {
+          display: false,
+        },
+        responsive: true,
+        maintainAspectRatio: false,
       },
     },
   });

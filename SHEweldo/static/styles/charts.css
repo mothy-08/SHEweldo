@@ -1,34 +1,339 @@
+/* Imports */
+@import url("https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&display=swap");
+
+/* Variables */
+:root {
+  --color-accent: #7b63b8;
+  --color-background: #111111;
+  --color-foreground: #1e1e1e;
+  --color-neutral-400: #4b4b4b;
+  --color-neutral-300: #9e9e9e;
+  --color-neutral-200: #ffffff;
+
+  --text-color: var(--color-neutral-200);
+  --text-color-light: var(--color-neutral-300);
+
+  --button-color: var(--color-accent);
+
+  --bar-color-light: var(--color-accent);
+  --bar-color-dark: var(--color-neutral-400);
+}
+
+/* CSS Resets */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  font: inherit;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+/* Utility Classes */
+.font-regular {
+  font-family: "Lexend", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+  font-weight: 400;
+}
+
+.font-medium {
+  font-family: "Lexend", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+  font-weight: 500;
+}
+
+.font-bold {
+  font-family: "Lexend", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+  font-weight: 700;
+}
+
+:is(a) {
+  color: inherit;
+  text-decoration: none;
+}
+
 body {
-  /* background-color:  */
-}
-
-.filter-container {
-  margin: 20px;
-  text-align: center;
-}
-
-.filters-wrapper {
+  padding-block: 16px;
+  background-color: var(--color-background);
+  min-height: 100vh;
   display: flex;
-  gap: 10px;
+  flex-direction: column;
+}
+
+header {
+  width: 90%;
+  margin-inline: auto;
+  display: flex;
+  flex-direction: column;
   justify-content: center;
-  margin-bottom: 20px;
+  gap: 16px;
+  margin-bottom: 32px;
 }
 
-.filter-select {
-  width: 200px;
+nav {
+  display: flex;
+  justify-content: space-between;
 }
 
-.apply-button {
-  padding: 5px 15px;
+nav ul {
+  display: flex;
+  align-items: center;
+  gap: 80px;
+}
+
+nav ul li {
+  list-style: none;
+}
+
+.nav-a {
+  color: var(--text-color-light);
+  transition: color 0.3s ease;
   cursor: pointer;
 }
 
-.bar-chart-container {
-  width: 80%;
-  margin: 0 auto;
+.nav-a.active {
+  position: relative;
+  color: var(--color-accent);
 }
 
-.pie-chart-container {
-  width: 50%;
-  margin: 20px auto;
+.nav-a.active::after {
+  content: "";
+  position: absolute;
+  display: block;
+  top: 62px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--color-accent);
+}
+
+.nav-a:hover {
+  color: var(--color-accent);
+}
+
+.line {
+  width: 100%;
+  height: 2px;
+  background: #2b2b2b;
+}
+
+main {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  place-items: center;
+  gap: 16px;
+}
+
+.title {
+  color: var(--text-color);
+  font-size: 4rem;
+}
+
+.subtitle {
+  font-size: 1.5rem;
+  color: var(--text-color-light);
+}
+
+.pie-chart-wrapper {
+  display: flex;
+  align-items: start;
+  justify-content: center;
+  border-radius: 20px;
+  padding: 32px 256px 32px 32px;
+  background: var(--color-foreground);
+  position: relative;
+}
+
+.title-and-legends-wrapper {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: end;
+  text-align: right;
+  gap: 32px;
+  top: 54px;
+  right: 40px;
+  color: var(--text-color);
+}
+
+.title-and-legends-wrapper > p {
+  font-size: 1.5rem;
+}
+
+.pie-chart-legends {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.legend {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.color-circle {
+  border-radius: 50%;
+  background-color: var(--color-accent);
+  width: 20px;
+  aspect-ratio: 1;
+}
+
+.color-circle.poorly {
+  background-color: var(--color-neutral-400);
+}
+
+#pieChart {
+  width: 200px;
+  height: 200px;
+}
+
+.bar-chart-wrapper {
+  width: 840px;
+  height: 450px;
+  grid-row: span 2;
+  background-color: var(--color-foreground);
+  border-radius: 40px;
+}
+
+#barChart {
+  margin: 40px 16px -40px 16px;
+}
+
+.filter-wrapper {
+  color: var(--text-color);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px 24px;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 16px;
+}
+
+.column > div > p {
+  margin-bottom: 8px;
+  font-size: 1.25rem;
+}
+
+.btn {
+  border: none;
+  background-color: var(--color-accent);
+  padding: 8px 16px;
+  border-radius: 8px;
+  color: var(--text-color);
+}
+
+.apply-button {
+  grid-column: span 2;
+}
+
+.filter-select {
+  background-color: var(--color-foreground);
+  color: var(--text-color);
+  border: none;
+  border-radius: 8px;
+  padding: 8px;
+  width: 100%;
+  text-align: center;
+  font-weight: 400;
+}
+
+.select2-container {
+  width: 100% !important;
+  border-radius: 8px !important;
+}
+
+/* Change the background and text color of the dropdown */
+.select2-container--default .select2-selection--single {
+  background-color: var(--color-foreground); /* Dropdown background */
+  color: var(--text-color); /* Selected text color */
+  border: none;
+  border-radius: 8px;
+  height: 36px !important;
+  display: flex;
+  align-items: center;
+  padding: 0 36px 0 12px;
+  text-align: center !important;
+}
+
+/* Change hover effect on dropdown options */
+.select2-container--default .select2-results__option--highlighted {
+  background-color: var(
+    --color-foreground
+  ) !important; /* Dropdown background */
+  color: var(--text-color) !important; /* Selected text color */
+}
+
+.select2-container--default .select2-selection__clear {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: white !important; /* Change to your preferred color */
+  font-size: 16px; /* Adjust size if needed */
+  opacity: 1; /* Make it fully visible */
+}
+
+/* Style the dropdown arrow */
+.select2-container--default .select2-selection__arrow b {
+  position: absolute;
+  top: 8px;
+  transform: translateY(4px);
+  right: 2px;
+  border-color: white transparent transparent transparent !important; /* Change arrow color */
+}
+
+/* Change placeholder color */
+.select2-container--default .select2-selection__placeholder {
+  color: var(--text-color) !important;
+}
+
+/* Change the selected text inside the dropdown */
+.select2-container--default
+  .select2-selection--single
+  .select2-selection__rendered {
+  color: var(--text-color) !important;
+  padding-left: 52px !important; /* Remove extra padding */
+  line-height: 36px; /* Centers text vertically */
+}
+
+.add-companies-wrapper {
+  align-self: start;
+  margin-left: 180px;
+}
+
+.add-companies-wrapper > p {
+  color: var(--text-color-light);
+  font-size: 1.25rem;
+  margin-bottom: 8px;
+}
+
+.button-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.button-wrapper > span {
+  color: var(--color-accent);
+  font-size: 2rem;
 }
