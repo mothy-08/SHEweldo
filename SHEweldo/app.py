@@ -10,8 +10,6 @@ from SHEweldo.services import Service, SalaryService, CompanyService
 from SHEweldo.controllers.database import FilterParams
 
 
-
-
 class AppAPI:
     def __init__(self, salary_service: Service, company_service: Service):
         self._salary_service = salary_service
