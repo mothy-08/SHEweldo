@@ -50,7 +50,7 @@
         <p>Hello there, here's what you need to know.</p>
       </section>
 
-      <section class="pie-chart-container">
+      <section class="pie-chart-wrapper">
         <canvas id="pieChart"></canvas>
 
         <p>Compensation Distribution</p>
@@ -67,11 +67,11 @@
         </div>
       </section>
 
-      <section class="bar-chart-container">
+      <section class="bar-chart-wrapper">
         <canvas id="barChart"></canvas>
       </section>
 
-      <section class="filter-container">
+      <section class="filter-wrapper">
         <div>
           <p>Select company:</p>
           <select id="companyFilter" class="filter-select">
@@ -120,12 +120,14 @@
           </select>
         </div>
 
-        <button id="applyFilters" class="apply-button">Apply Filters</button>
+        <button id="applyFilters" class="apply-button btn">
+          Apply Filters
+        </button>
       </section>
 
       <section class="add-companies-wrapper">
         <p>Can't find what you're looking for?</p>
-        <button>
+        <button class="add-companies-button btn">
           <a href="">Add Companies</a>
         </button>
       </section>
