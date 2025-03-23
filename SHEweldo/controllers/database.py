@@ -279,6 +279,28 @@ class DatabaseController(IDatabaseController):
         await cursor.execute(query, tuple(where_params))
         rows = await cursor.fetchall()
         return [{"is_well_compensated": row[0], "count": row[1]} for row in rows]
+    
+    async def get_top_companies(self, filters: FilterParams, range_step: int) -> List[Dict[str, Any]]:
+        where_clause, where_params = await self._build_where_clause_and_params(filters)
+
+        query = f"""
+            SELECT c.name, c.hash, AVG(s.salary_amount / ?) * ? AS avg_salary
+            FROM salaries s
+            JOIN companies c ON s.company_hash = c.hash
+            {where_clause}
+            GROUP BY c.hash
+            ORDER BY avg_salary DESC
+            LIMIT 5
+        """
+        params = [range_step, range_step] + where_params
+        cursor = await self._connection.cursor()
+        await cursor.execute(query, tuple(params))
+        rows = await cursor.fetchall()
+
+        return [
+            {"name": row[0], "hash": row[1], "average_salary": row[2]}
+            for row in rows
+        ]
 
     async def close(self) -> None:
         if self._connection:
