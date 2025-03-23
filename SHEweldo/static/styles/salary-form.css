@@ -210,11 +210,32 @@ h2 {
   align-items: center;
   border-radius: 10px;
   height: 65vh;
-
   opacity: 0;
   transform: translateY(20px);
   transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
 }
+
+.formCompany {
+  background-color: #484444;
+  font-family: "Lexend", sans-serif;
+  padding: 20px;
+  display: flex;
+  width: 80vw;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border-radius: 10px;
+  height: 50vh;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+}
+
+.formCompany.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 
 .formSalary.show {
   opacity: 1;
@@ -291,3 +312,6 @@ form button {
   text-align: center;
 }
 
+a {
+  text-decoration: none;
+}
