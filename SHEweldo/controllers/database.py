@@ -281,6 +281,11 @@ class DatabaseController(IDatabaseController):
         return [{"is_well_compensated": row[0], "count": row[1]} for row in rows]
     
     async def get_top_companies(self, filters: FilterParams, range_step: int) -> List[Dict[str, Any]]:
+        """
+        This function works as intended.  
+        However, due to SQLite's limitations, it cannot handle very large datasets efficiently.  
+        For this reason, we did not extend its implementation further.  
+        """
         where_clause, where_params = await self._build_where_clause_and_params(filters)
 
         query = f"""
@@ -293,14 +298,13 @@ class DatabaseController(IDatabaseController):
             LIMIT 5
         """
         params = [range_step, range_step] + where_params
-        cursor = await self._connection.cursor()
-        await cursor.execute(query, tuple(params))
-        rows = await cursor.fetchall()
 
-        return [
-            {"name": row[0], "hash": row[1], "average_salary": row[2]}
-            for row in rows
-        ]
+        async with self._connection.cursor() as cursor:
+            await cursor.execute(query, tuple(params))
+            rows = await cursor.fetchall()
+
+        return [{"name": name, "hash": hash_, "average_salary": avg_salary} for name, hash_, avg_salary in rows]
+
 
     async def close(self) -> None:
         if self._connection:
