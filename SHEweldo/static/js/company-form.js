@@ -1,13 +1,13 @@
 document.addEventListener("DOMContentLoaded", function () {
 	setTimeout(() => {
 		document.querySelector(".formCompany").classList.add("show");
-    populateIndustries();
+		populateIndustries();
 	}, 100);
 });
 
 function populateIndustries() {
 	const industries = [
-	  "technology",
+		"technology",
 		"finance",
 		"healthcare",
 		"manufacturing",
@@ -26,21 +26,64 @@ function populateIndustries() {
 	];
 	const filter = document.getElementById("industry");
 	industries.forEach((industry) => {
-	  const option = document.createElement("option");
-	  option.value = industry;
-	  option.textContent = industry.charAt(0).toUpperCase() + industry.slice(1);
-	  filter.appendChild(option);
+		const option = document.createElement("option");
+		option.value = industry;
+		option.textContent =
+			industry.charAt(0).toUpperCase() + industry.slice(1);
+		filter.appendChild(option);
 	});
-  }
+}
 
 document.getElementById("companyForm").addEventListener("submit", async (e) => {
 	e.preventDefault();
 
+	const companyName = document.getElementById("company_name").value.trim();
+	const companySize = parseInt(document.getElementById("company_size").value);
+	const industry = document.getElementById("industry").value;
+	const country = document.getElementById("country").value.trim();
+
+	const messageDiv = document.getElementById("message");
+
+	if (!companyName || companyName.length < 2 || companyName.length > 100) {
+		messageDiv.style.display = "block";
+		messageDiv.style.backgroundColor = "#f8d7da";
+		messageDiv.style.color = "#721c24";
+		messageDiv.textContent =
+			"Company name must be between 2 and 100 characters.";
+		return;
+	}
+
+	if (isNaN(companySize) || companySize < 1 || companySize > 1000000) {
+		messageDiv.style.display = "block";
+		messageDiv.style.backgroundColor = "#f8d7da";
+		messageDiv.style.color = "#721c24";
+		messageDiv.textContent =
+			"Company size must be a number between 1 and 1,000,000.";
+		return;
+	}
+
+	if (!industry) {
+		messageDiv.style.display = "block";
+		messageDiv.style.backgroundColor = "#f8d7da";
+		messageDiv.style.color = "#721c24";
+		messageDiv.textContent = "Please select an industry.";
+		return;
+	}
+
+	if (!country || country.length < 2 || country.length > 100) {
+		messageDiv.style.display = "block";
+		messageDiv.style.backgroundColor = "#f8d7da";
+		messageDiv.style.color = "#721c24";
+		messageDiv.textContent =
+			"Country must be between 2 and 100 characters.";
+		return;
+	}
+
 	const formData = {
-		company_name: document.getElementById("company_name").value,
-		company_size: parseInt(document.getElementById("company_size").value),
-		company_industry: document.getElementById("company_industry").value,
-		country: document.getElementById("country").value,
+		company_name: companyName,
+		company_size: companySize,
+		company_industry: industry,
+		country: country,
 	};
 
 	try {
@@ -53,7 +96,6 @@ document.getElementById("companyForm").addEventListener("submit", async (e) => {
 		});
 
 		const result = await response.json();
-		const messageDiv = document.getElementById("message");
 
 		if (response.ok) {
 			messageDiv.style.display = "block";
@@ -78,7 +120,6 @@ document.getElementById("companyForm").addEventListener("submit", async (e) => {
 		}, 5000);
 	} catch (error) {
 		console.error("Error:", error);
-		const messageDiv = document.getElementById("message");
 		messageDiv.style.display = "block";
 		messageDiv.style.backgroundColor = "#f8d7da";
 		messageDiv.style.color = "#721c24";
