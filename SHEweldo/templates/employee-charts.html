@@ -17,12 +17,12 @@
 		/>
 		<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 		<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+		<script src="{{ url_for('static', filename='js/cookie-checker.js') }}"></script>
 	</head>
 
 	<body class="font-regular">
 		<header class="font-bold">
 			<nav>
-				<!-- Logo -->
 				<a href="/">
 					<img
 						src="{{ url_for('static', filename='images/SHEweldo Logo Violet.svg') }}"
@@ -31,13 +31,11 @@
 					/>
 				</a>
 
-				<!-- Navigation Links -->
 				<ul class="nav-links">
 					<li>
 						<a class="nav-a" href="/graph/companies/">Home</a>
 					</li>
 					<li>
-						<!-- Handle active state in JS later -->
 						<a class="nav-a" href="/graph/companies/"
 							>Company Benchmark</a
 						>
