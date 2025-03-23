@@ -1,8 +1,37 @@
 document.addEventListener("DOMContentLoaded", function () {
 	setTimeout(() => {
 		document.querySelector(".formCompany").classList.add("show");
+    populateIndustries();
 	}, 100);
 });
+
+function populateIndustries() {
+	const industries = [
+	  "technology",
+		"finance",
+		"healthcare",
+		"manufacturing",
+		"retail",
+		"education",
+		"transportation",
+		"energy",
+		"entertainment",
+		"telecommunications",
+		"construction",
+		"hospitality",
+		"real estate",
+		"agriculture",
+		"pharmaceuticals",
+		"other",
+	];
+	const filter = document.getElementById("industry");
+	industries.forEach((industry) => {
+	  const option = document.createElement("option");
+	  option.value = industry;
+	  option.textContent = industry.charAt(0).toUpperCase() + industry.slice(1);
+	  filter.appendChild(option);
+	});
+  }
 
 document.getElementById("companyForm").addEventListener("submit", async (e) => {
 	e.preventDefault();
