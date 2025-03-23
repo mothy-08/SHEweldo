@@ -154,7 +154,7 @@ function updateBarChart(data) {
       labels: labels,
       datasets: [
         {
-          label: "Count",
+          label: "Companies with this avg. salary",
           data: counts,
           backgroundColor: counts.map((_, index) =>
             index === highlightIndex ? "#7b63b8 " : "#4b4b4b"
@@ -167,10 +167,10 @@ function updateBarChart(data) {
       scales: {
         y: {
           beginAtZero: true,
-          title: { display: true, text: "No. of people" },
+          title: { display: true, text: "No. of companies" },
         },
         x: {
-          title: { display: true, text: "Salary Range" },
+          title: { display: true, text: "Average Salary Range" },
           ticks: { autoSkip: false, maxRotation: 90, minRotation: 90 },
         },
       },
