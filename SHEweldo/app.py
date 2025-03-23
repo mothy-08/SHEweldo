@@ -5,9 +5,9 @@ sys.path.append(".")
 
 from quart import Quart, jsonify, request, render_template
 
-from models.enums import Department, ExperienceLevel, Gender, Industry
-from services import Service, SalaryService, CompanyService
-from controllers.database import FilterParams
+from SHEweldo.models.enums import Department, ExperienceLevel, Gender, Industry
+from SHEweldo.services import Service, SalaryService, CompanyService
+from SHEweldo.controllers.database import FilterParams
 
 
 

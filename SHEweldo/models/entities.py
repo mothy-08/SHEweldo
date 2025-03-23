@@ -1,7 +1,7 @@
 import hashlib, os
 from abc import ABC, abstractmethod
 from typing import Optional
-from models.enums import *
+from SHEweldo.models.enums import *
 
 class BaseEntity(ABC):
     def __init__(self, entity_id: str):
