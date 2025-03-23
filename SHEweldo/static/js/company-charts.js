@@ -3,8 +3,6 @@ let pieChart = null;
 
 $(document).ready(async function () {
   $("#companyFilter").select2({
-    // placeholder: "Choose company...",
-    // allowClear: true,
     minimumResultsForSearch: -1,
   });
 

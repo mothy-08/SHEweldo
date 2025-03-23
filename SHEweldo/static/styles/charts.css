@@ -282,16 +282,6 @@ main {
   color: var(--text-color) !important; /* Selected text color */
 }
 
-.select2-container--default .select2-selection__clear {
-  position: absolute;
-  right: 4px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: white !important; /* Change to your preferred color */
-  font-size: 16px; /* Adjust size if needed */
-  opacity: 1; /* Make it fully visible */
-}
-
 /* Style the dropdown arrow */
 .select2-container--default .select2-selection__arrow b {
   position: absolute;
@@ -302,6 +292,10 @@ main {
 }
 
 /* Change placeholder color */
+.select2-container--default .select2-selection__placeholder {
+  color: var(--text-color) !important;
+}
+
 .select2-container--default .select2-selection__placeholder {
   color: var(--text-color) !important;
 }
@@ -336,4 +330,13 @@ main {
 .button-wrapper > span {
   color: var(--color-accent);
   font-size: 2rem;
+}
+
+.span-2 {
+  grid-column: span 2;
+}
+
+.span-2 > p {
+  margin-bottom: 8px;
+  font-size: 1.25rem;
 }
