@@ -195,7 +195,7 @@ class AppAPI:
 
         @self._app.route("/companies/add", methods=["GET"])
         async def add_company():
-            return await render_template("companies.html")
+            return await render_template("company-form.html")
 
         @self._app.route("/graph/employee", methods=["GET"])
         async def serve_employee_graph():
