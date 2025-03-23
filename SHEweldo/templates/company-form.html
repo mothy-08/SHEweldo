@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Company Submission Form</title>
+		<link
+			rel="stylesheet"
+			href="{{ url_for('static', filename='styles/salary-form.css') }}"
+		/>
+	</head>
+	<body>
+		<header class="menubar font-thin">
+			<img
+				src="{{ url_for('static', filename='images/SHEweldo.png') }}"
+				alt="SHEweldo Logo"
+				class="small-logo"
+			/>
+			<div class="menubar-button-wrapper">
+				<a href="/"
+					><button class="menubar-btn">
+						<span class="material-symbols-outlined"> Home </span>
+					</button></a
+				>
+
+				<a href="/company/graph"
+					><button class="menubar-btn">
+						<span class="material-symbols-outlined">
+							View Companies
+						</span>
+					</button></a
+				>
+
+				<a href="/employee/submit"
+					><button class="menubar-btn">
+						<span class="material-symbols-outlined">
+							Add Salary Data
+						</span>
+					</button></a
+				>
+			</div>
+		</header>
+		<br />
+		<div class="formCompany">
+			<h2>Company Submission Form</h2>
+			<form id="companyForm">
+				<br />
+				<div class="row">
+					<input
+						type="text"
+						id="company_name"
+						name="company_name"
+						placeholder="Company Name"
+						required
+						minlength="2"
+						maxlength="100"
+					/><br />
+					<input
+						type="number"
+						id="company_size"
+						name="company_size"
+						placeholder="Company Size"
+						required
+						min="1"
+						max="1000000"
+					/><br />
+				</div>
+				<div class="row">
+					<select id="industry" name="industry" required>
+						<option value="" selected disabled>Select Industry</option>
+					</select><br />
+					<input
+						type="text"
+						id="country"
+						name="country"
+						placeholder="Country"
+						required
+						minlength="2"
+						maxlength="100"
+					/><br />
+				</div>
+				<button type="submit">Submit</button>
+			</form>
+		</div>
+		<div
+			id="message"
+			style="
+				display: none;
+				padding: 10px;
+				margin-top: 20px;
+				border-radius: 5px;
+			"
+		></div>
+		<script
+			src="{{ url_for('static', filename='/js/company-form.js') }}"
+			defer
+		></script>
+	</body>
+</html>

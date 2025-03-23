@@ -1,5 +1,8 @@
+import asyncio
 import math
 import sys
+import logging
+
 
 sys.path.append(".")
 
@@ -8,8 +11,6 @@ from quart import Quart, jsonify, request, render_template
 from SHEweldo.models.enums import Department, ExperienceLevel, Gender, Industry
 from SHEweldo.services import Service, SalaryService, CompanyService
 from SHEweldo.controllers.database import FilterParams
-
-
 
 
 class AppAPI:
@@ -26,7 +27,7 @@ class AppAPI:
 
     def _setup_api_routes(self):
 
-        @self._app.route("/api/salaries/submit", methods=["POST"])
+        @self._app.route("/api/employee/submit", methods=["POST"])
         async def post_salary():
             try:
                 data = await request.get_json()
@@ -68,7 +69,7 @@ class AppAPI:
             except Exception as e:
                 return jsonify({"error": "Server error"}), 500
             
-        @self._app.route("/api/companies/add", methods=["POST"])
+        @self._app.route("/api/company/submit", methods=["POST"])
         async def post_company():
             try:
                 data = await request.get_json()
@@ -82,7 +83,7 @@ class AppAPI:
                 return jsonify({"error": "Server error"}), 500
 
         @self._app.route("/api/graphs/employee", methods=["GET"])
-        async def get_graphs():
+        async def get_comparison_graphs():
             try:
                 filters: FilterParams = {}
 
@@ -188,30 +189,46 @@ class AppAPI:
         async def serve_frontend():
             return await render_template("index.html")
 
-        @self._app.route("/salaries/submit", methods=["GET"])
+        @self._app.route("/employee/submit", methods=["GET"])
         async def submit_salary():
             return await render_template("salary-form.html")
 
-        @self._app.route("/companies/add", methods=["GET"])
+        @self._app.route("/company/submit", methods=["GET"])
         async def add_company():
-            return await render_template("companies.html")
+            return await render_template("company-form.html")
 
-        @self._app.route("/graph/employee", methods=["GET"])
+        @self._app.route("/employee/graph", methods=["GET"])
         async def serve_employee_graph():
             return await render_template("employee-charts.html")
 
-        @self._app.route("/graph/companies/", methods=["GET"])
+        @self._app.route("/company/graph", methods=["GET"])
         async def serve_company_graph():
             return await render_template("company-charts.html")
 
     def _configure_error_handlers(self):
         @self._app.errorhandler(404)
         async def not_found(error):
-            return jsonify({"error": "Resource not found"}), 404
+            return await render_template(
+                "error.html",
+                error_code="404",
+                error_message="Oops! The page you're looking for doesn't exist."
+            ), 404
+
+        @self._app.errorhandler(500)
+        async def internal_server_error(error):
+            return await render_template(
+                "error.html",
+                error_code="500",
+                error_message="Something went wrong on our end. Please try again later."
+            ), 500
 
         @self._app.errorhandler(405)
         async def method_not_allowed(error):
-            return jsonify({"error": "Method not allowed"}), 405
+            return await render_template(
+                "error.html",
+                error_code="405",
+                error_message="This method is not allowed for the requested resource."
+            ), 405
 
     def run(self, host: str = "0.0.0.0", port: int = 5000, debug: bool = False):
         self._app.run(host=host, port=port, debug=debug)
@@ -230,23 +247,46 @@ async def main():
 
 
 if __name__ == "__main__":
+    import logging
+    import os
     import asyncio
-    from hypercorn.asyncio import serve
     from hypercorn.config import Config
+    from hypercorn.asyncio import serve
 
-    async def run_app():
+    log_file = os.path.abspath("app.log")
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        handlers=[
+            logging.FileHandler(log_file),
+            logging.StreamHandler()
+        ]
+    )
+    logger = logging.getLogger(__name__)
+    logger.info("===== Application Starting =====")
+
+    async def setup_app():
+        from SHEweldo.services import SalaryService, CompanyService
+        
         salary_service = SalaryService()
         company_service = CompanyService()
-
         await salary_service.initialize()
         await company_service.initialize()
-
+        
+        from SHEweldo.app import AppAPI
         api = AppAPI(salary_service, company_service)
+        return api._app
 
-        config = Config()
-        config.bind = ["0.0.0.0:5000"]
-        config.use_reloader = True
+    config = Config()
+    config.bind = ["0.0.0.0:5000"]
+    config.use_reloader = True
+    config.loglevel = "info"
+    config.logconfig = None
 
-        await serve(api._app, config)
-
-    asyncio.run(run_app())
+    try:
+        logger.info(f"Log file location: {log_file}")
+        app = asyncio.run(setup_app())
+        asyncio.run(serve(app, config))
+    except Exception as e:
+        logger.exception("Server failed to start")
+        raise

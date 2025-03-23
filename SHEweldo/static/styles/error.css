@@ -1,0 +1,32 @@
+.error-page {
+	text-align: center;
+	padding: var(--spacing-3);
+	color: var(--color-neutral-300);
+}
+
+.error-page__title {
+	font-size: var(--font-size-5xl);
+	background: -webkit-linear-gradient(
+		var(--color-primary),
+		var(--color-accent-700)
+	);
+	background-clip: text;
+	-webkit-text-fill-color: transparent;
+	margin-bottom: var(--spacing-1);
+}
+
+.error-page__message {
+	font-size: var(--font-size-lg);
+	color: var(--color-neutral-200);
+	margin-bottom: var(--spacing-3);
+}
+
+.error-page__logo {
+	width: 300px;
+	height: auto;
+	margin-bottom: var(--spacing-1);
+}
+
+.error-page__button {
+	margin-top: var(--spacing-3);
+}

@@ -4,6 +4,9 @@ from SHEweldo.models.enums import *
 import aiosqlite
 from typing import Any, Dict, List, Tuple, TypedDict, Optional
 
+import logging
+logger = logging.getLogger(__name__)
+
 class FilterParams(TypedDict, total=False):
     company_hash: str
     industry: Industry
@@ -235,8 +238,9 @@ class DatabaseController(IDatabaseController):
             GROUP BY range_start
             ORDER BY range_start DESC
         """
-        params = [range_step, range_step] + params
+        params = params + [range_step, range_step]
         cursor = await self._connection.cursor()
+        logger.info("Executing query: %s with params %s", query, params)
 
         await cursor.execute(query, tuple(params))
 
@@ -275,6 +279,32 @@ class DatabaseController(IDatabaseController):
         await cursor.execute(query, tuple(where_params))
         rows = await cursor.fetchall()
         return [{"is_well_compensated": row[0], "count": row[1]} for row in rows]
+    
+    async def get_top_companies(self, filters: FilterParams, range_step: int) -> List[Dict[str, Any]]:
+        """
+        This function works as intended.  
+        However, due to SQLite's limitations, it cannot handle very large datasets efficiently.  
+        For this reason, we did not extend its implementation further.  
+        """
+        where_clause, where_params = await self._build_where_clause_and_params(filters)
+
+        query = f"""
+            SELECT c.name, c.hash, AVG(s.salary_amount / ?) * ? AS avg_salary
+            FROM salaries s
+            JOIN companies c ON s.company_hash = c.hash
+            {where_clause}
+            GROUP BY c.hash
+            ORDER BY avg_salary DESC
+            LIMIT 5
+        """
+        params = [range_step, range_step] + where_params
+
+        async with self._connection.cursor() as cursor:
+            await cursor.execute(query, tuple(params))
+            rows = await cursor.fetchall()
+
+        return [{"name": name, "hash": hash_, "average_salary": avg_salary} for name, hash_, avg_salary in rows]
+
 
     async def close(self) -> None:
         if self._connection:

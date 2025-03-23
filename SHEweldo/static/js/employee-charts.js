@@ -127,7 +127,7 @@ function updateCharts(data) {
       labels: labels,
       datasets: [
         {
-          label: "Count",
+          label: "People with this salary range",
           data: counts,
           backgroundColor: counts.map((_, index) =>
             index === highlightIndex ? "#7b63b8 " : "#4b4b4b"
