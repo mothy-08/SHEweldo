@@ -87,7 +87,7 @@ document.getElementById("companyForm").addEventListener("submit", async (e) => {
 	};
 
 	try {
-		const response = await fetch("/api/companies/add", {
+		const response = await fetch("/api/company/submit", {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -105,7 +105,7 @@ document.getElementById("companyForm").addEventListener("submit", async (e) => {
 			document.getElementById("companyForm").reset();
 
 			setTimeout(() => {
-				window.open("/salaries/submit", "_blank");
+				window.open("/employee/submit", "_blank");
 			}, 1000);
 		} else {
 			messageDiv.style.display = "block";

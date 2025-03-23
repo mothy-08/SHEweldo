@@ -13,5 +13,5 @@ function getCookie(name) {
   const salaryAmount = getCookie("salary_amount");
 
   if (!salaryId || !salaryAmount) {
-    window.location.href = "/salaries/submit";
+    window.location.href = "/employee/submit";
   }

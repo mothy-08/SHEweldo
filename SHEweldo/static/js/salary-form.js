@@ -53,7 +53,7 @@ document.addEventListener("DOMContentLoaded", populateDepartments);
 document.addEventListener("DOMContentLoaded", populateCompanies);
 
 document.getElementById("addCompanyBtn").addEventListener("click", () => {
-    window.location.href = "/companies/add";
+    window.location.href = "/company/submit";
 });
 
 document.getElementById("salaryForm").addEventListener("submit", async (e) => {
@@ -146,7 +146,7 @@ document.getElementById("salaryForm").addEventListener("submit", async (e) => {
     };
 
     try {
-        const response = await fetch("/api/salaries/submit", {
+        const response = await fetch("/api/employee/submit", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -164,7 +164,7 @@ document.getElementById("salaryForm").addEventListener("submit", async (e) => {
             document.getElementById("salaryForm").reset();
 
             setTimeout(() => {
-                window.location.href = "/graph/employee";
+                window.location.href = "/employee/graph";
             }, 500);
         } else {
             messageDiv.style.display = "block";

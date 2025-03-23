@@ -27,7 +27,7 @@ class AppAPI:
 
     def _setup_api_routes(self):
 
-        @self._app.route("/api/salaries/submit", methods=["POST"])
+        @self._app.route("/api/employee/submit", methods=["POST"])
         async def post_salary():
             try:
                 data = await request.get_json()
@@ -69,7 +69,7 @@ class AppAPI:
             except Exception as e:
                 return jsonify({"error": "Server error"}), 500
             
-        @self._app.route("/api/companies/add", methods=["POST"])
+        @self._app.route("/api/company/submit", methods=["POST"])
         async def post_company():
             try:
                 data = await request.get_json()
@@ -83,7 +83,7 @@ class AppAPI:
                 return jsonify({"error": "Server error"}), 500
 
         @self._app.route("/api/graphs/employee", methods=["GET"])
-        async def get_graphs():
+        async def get_comparison_graphs():
             try:
                 filters: FilterParams = {}
 
@@ -189,19 +189,19 @@ class AppAPI:
         async def serve_frontend():
             return await render_template("index.html")
 
-        @self._app.route("/salaries/submit", methods=["GET"])
+        @self._app.route("/employee/submit", methods=["GET"])
         async def submit_salary():
             return await render_template("salary-form.html")
 
-        @self._app.route("/companies/add", methods=["GET"])
+        @self._app.route("/company/submit", methods=["GET"])
         async def add_company():
             return await render_template("company-form.html")
 
-        @self._app.route("/graph/employee", methods=["GET"])
+        @self._app.route("/employee/graph", methods=["GET"])
         async def serve_employee_graph():
             return await render_template("employee-charts.html")
 
-        @self._app.route("/graph/companies/", methods=["GET"])
+        @self._app.route("/company/graph", methods=["GET"])
         async def serve_company_graph():
             return await render_template("company-charts.html")
 
