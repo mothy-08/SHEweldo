@@ -279,12 +279,12 @@ if __name__ == "__main__":
     certfile_path = os.path.join("SHEweldo", "localhost.pem")
     keyfile_path = os.path.join("SHEweldo", "localhost-key.pem")
 
-    if os.path.exists(certfile_path) and os.path.exists(keyfile_path):
-        config.certfile = certfile_path
-        config.keyfile = keyfile_path
-        logger.info("SSL/TLS certificates found. Enabling HTTPS.")
-    else:
-        logger.warning("SSL/TLS certificates not found. Running in HTTP mode.")
+    # if os.path.exists(certfile_path) and os.path.exists(keyfile_path):
+    #     config.certfile = certfile_path
+    #     config.keyfile = keyfile_path
+    #     logger.info("SSL/TLS certificates found. Enabling HTTPS.")
+    # else:
+    #     logger.warning("SSL/TLS certificates not found. Running in HTTP mode.")
 
     try:
         logger.info(f"Log file location: {log_file}")
