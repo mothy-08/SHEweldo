@@ -154,7 +154,6 @@ body {
 
 /* Menubar Styles */
 .menubar {
-
   position: fixed;
   top: 0;
   left: 0;
@@ -236,7 +235,6 @@ h2 {
   transform: translateY(0);
 }
 
-
 .formSalary.show {
   opacity: 1;
   transform: translateY(0);
@@ -246,8 +244,8 @@ form {
   width: 100%;
 }
 
-form input, 
-form select, 
+form input,
+form select,
 form button {
   background-color: rgb(14, 17, 22);
   color: white;
@@ -264,13 +262,13 @@ form input::placeholder {
   color: white;
 }
 
-form input, 
+form input,
 form select {
   color: white !important;
   text-align: start;
 }
 
-form input:focus, 
+form input:focus,
 form select:focus {
   background-color: white;
   color: black !important;
@@ -278,14 +276,14 @@ form select:focus {
   outline: none;
 }
 
-form input:hover, 
-form button:hover, 
+form input:hover,
+form button:hover,
 form select:hover {
   background-color: white;
   color: black !important;
 }
 
-form input:hover::placeholder, 
+form input:hover::placeholder,
 form input:focus::placeholder {
   color: black !important;
 }
@@ -297,8 +295,8 @@ form input:focus::placeholder {
   gap: 3px;
 }
 
-.row select, 
-.row input, 
+.row select,
+.row input,
 .row button {
   flex: 1;
   min-width: 0;
@@ -314,4 +312,12 @@ form button {
 
 a {
   text-decoration: none;
+}
+
+header {
+  margin-top: -69px;
+}
+
+.company-form-header {
+  margin-top: -207px;
 }

@@ -1,76 +1,123 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Salary Submission Form</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles/salary-form.css') }}">
-</head>
-<body>
-    <header class="menubar font-thin">
-        <img
-          src="{{ url_for('static', filename='images/SHEweldo.png') }}"
-          alt="SHEweldo Logo"
-          class="small-logo"
-        />
-        <div class="menubar-button-wrapper">
-          <a href="/"><button class="menubar-btn">
-            <span class="material-symbols-outlined"> Home </span>
-          </button></a>
-          <a href="/company/graph"><button class="menubar-btn">
-            <span class="material-symbols-outlined"> View Companies </span>
-          </button></a>
-          <a href="/employee/submit"><button class="menubar-btn">
-            <span class="material-symbols-outlined"> Compare Salaries </span>
-          </button></a>
-        </div>
-      </header>
-<br>
-      <div class="formSalary">
-    <h2>Salary Submission Form</h2>
-    <form id="salaryForm">
-        <br>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='styles/charts.css') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='styles/salary-form.css') }}"
+    />
+  </head>
+  <body>
+    <header class="font-bold">
+      <nav>
+        <a href="/">
+          <img
+            src="{{ url_for('static', filename='images/SHEweldo Logo Violet.svg') }}"
+            alt="SHEweldo Logo"
+            class="logo"
+          />
+        </a>
+
+        <ul class="nav-links">
+          <li>
+            <a class="nav-a" href="/">Home</a>
+          </li>
+          <li>
+            <a class="nav-a" href="/company/graph">Company Benchmark</a>
+          </li>
+          <li>
+            <a class="nav-a active" href="/employee/submit">Compare Salaries</a>
+          </li>
+        </ul>
+      </nav>
+
+      <div class="line"></div>
+    </header>
+    <br />
+    <div class="formSalary">
+      <h2>Salary Submission Form</h2>
+      <form id="salaryForm">
+        <br />
         <div class="row">
-        <select id="company" name="company_hash" required>
+          <select id="company" name="company_hash" required>
             <option value="">Select Company</option>
-        </select>
-        <button type="button" id="addCompanyBtn" class="company-btn">Add Company</button>
-    </div>
-    <div class="row">
-        <input type="number" id="years_at_the_company" name="years_at_the_company" placeholder="Years at Company" min="0" max="50" required><br>
-    
-        <input type="number" id="total_experience" name="total_experience" placeholder="Total Experience" min="0" max="50" required><br>
-    </div>
-        <input type="number" id="salary_amount" name="salary_amount" placeholder="Monthly Salary Amount (in Philippine Peso)" min="0" required><br>
-    <div class="row">
-        <select id="gender" name="gender" required>
+          </select>
+          <button type="button" id="addCompanyBtn" class="company-btn">
+            Add Company
+          </button>
+        </div>
+        <div class="row">
+          <input
+            type="number"
+            id="years_at_the_company"
+            name="years_at_the_company"
+            placeholder="Years at Company"
+            min="0"
+            max="50"
+            required
+          /><br />
+
+          <input
+            type="number"
+            id="total_experience"
+            name="total_experience"
+            placeholder="Total Experience"
+            min="0"
+            max="50"
+            required
+          /><br />
+        </div>
+        <input
+          type="number"
+          id="salary_amount"
+          name="salary_amount"
+          placeholder="Monthly Salary Amount (in Philippine Peso)"
+          min="0"
+          required
+        /><br />
+        <div class="row">
+          <select id="gender" name="gender" required>
             <option value="" selected disabled>Select Gender</option>
             <option value="Male">Male</option>
             <option value="Female">Female</option>
-            <option value="Other">Other</option>
-        </select><br>
+            <option value="Other">Other</option></select
+          ><br />
 
-        <select id="is_well_compensated" name="is_well_compensated" required>
+          <select id="is_well_compensated" name="is_well_compensated" required>
             <option value="" selected disabled>Is Well Compensated?</option>
             <option value="true">Yes</option>
-            <option value="false">No</option>
-        </select><br>
-    </div>
-    <div class="row">
-        <select id="department" required>
+            <option value="false">No</option></select
+          ><br />
+        </div>
+        <div class="row">
+          <select id="department" required>
             <option value="">Select Department</option>
-        </select>
-        <input type="text" id="job_title" name="job_title" placeholder="Job Title" required><br>
-    </div>
+          </select>
+          <input
+            type="text"
+            id="job_title"
+            name="job_title"
+            placeholder="Job Title"
+            required
+          /><br />
+        </div>
         <button type="submit">Submit</button>
-
-    </form>
-</div>
-    <div id="message" style="display: none; padding: 10px; margin-top: 20px; border-radius: 5px;"></div>
+      </form>
+    </div>
+    <div
+      id="message"
+      style="display: none; padding: 10px; margin-top: 20px; border-radius: 5px"
+    ></div>
 
     <script
       src="{{ url_for('static', filename='/js/salary-form.js') }}"
       defer
     ></script>
-</body>
+  </body>
 </html>

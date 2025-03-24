@@ -1,36 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<link
-			rel="stylesheet"
-			href="{{ url_for('static', filename='styles/global.css') }}"
-		/>
-		<title>SHEweldo</title>
-	</head>
-	<body class="landing-body font-medium">
-		<header class="landing-header">
-			<img
-				src="{{ url_for('static', filename='images/SHEweldo.png') }}"
-				alt="SHEweldo Logo"
-				class="landing-header__logo"
-			/>
-			<h1 class="landing-header__subtitle">
-				Illuminating the Path to Equal Pay
-			</h1>
-			<p class="landing-header__description">
-				Data-Driven Insights for a Fairer Future
-			</p>
-		</header>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='styles/global.css') }}"
+    />
+    <title>SHEweldo</title>
+  </head>
+  <body class="landing-body font-medium">
+    <header class="landing-header">
+      <img
+        src="{{ url_for('static', filename='images/SHEweldo Logo Violet.svg') }}"
+        alt="SHEweldo Logo"
+        class="landing-header__logo"
+      />
+      <h1 class="landing-header__subtitle">
+        Illuminating the Path to Equal Pay
+      </h1>
+      <p class="landing-header__description">
+        Data-Driven Insights for a Fairer Future
+      </p>
+    </header>
 
-		<section class="landing-buttons font-bold">
-			<button class="btn">
-				<a href="/company/graph">Company Benchmark</a>
-			</button>
-			<button class="btn btn--inverted">
-				<a href="/employee/submit">Compare Salaries</a>
-			</button>
-		</section>
-	</body>
+    <section class="landing-buttons font-bold">
+      <button class="btn">
+        <a href="/company/graph">Company Benchmark</a>
+      </button>
+      <button class="btn btn--inverted">
+        <a href="/employee/submit">Compare Salaries</a>
+      </button>
+    </section>
+  </body>
 </html>

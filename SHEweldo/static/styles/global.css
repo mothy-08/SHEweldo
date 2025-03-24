@@ -6,8 +6,8 @@
   /* Colors */
   --color-background: rgb(14, 17, 22);
   --color-primary: rgb(218, 176, 232);
-  --color-accent-700: rgb(196, 118, 222);
-  --color-accent-400: rgb(167, 106, 187);
+  --color-accent-700: #7b63b8;
+  --color-accent-400: #896fca;
   --color-neutral-700: rgb(59, 59, 60);
   --color-neutral-300: rgb(240, 239, 252);
   --color-neutral-200: rgb(224, 223, 248);
@@ -82,8 +82,9 @@ body {
 }
 
 .landing-header__logo {
+  display: block;
   height: auto;
-  max-width: 100%;
+  width: 600px;
 }
 
 .landing-header__subtitle {
