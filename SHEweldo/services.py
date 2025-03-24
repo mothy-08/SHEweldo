@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from enum import Enum
 from typing import Dict, Any, Optional, Type
 
 from SHEweldo.models.entities import SalaryRecord, Company
@@ -36,6 +37,22 @@ class Service(ABC):
         piegraph_data = await self.db_controller.get_pie_graph_data(filters)
 
         return bargraph_data, piegraph_data
+    
+    def _build_filters(self, request_args, param_config: list[tuple[str, type | None]]) -> FilterParams:
+        filters: FilterParams = {}
+        
+        for param_name, value_type in param_config:
+            if param_name in request_args:
+                raw_value = request_args.get(param_name)
+                
+                if value_type is None:
+                    filters[param_name] = raw_value
+                elif issubclass(value_type, Enum):
+                    filters[param_name] = value_type(raw_value.lower())
+                else:
+                    raise ValueError(f"Unsupported type {value_type} for param {param_name}")
+        
+        return filters
 
     @abstractmethod
     async def add(self, data: Dict[str, Any]) -> tuple[Dict[str, Any], int]:

@@ -97,19 +97,16 @@ class AppAPI:
                 )
                 salary_amount = math.floor(raw_salary / range_steps) * range_steps
 
-                if "company_hash" in request.args:
-                    filters["company_hash"] = request.args.get("company_hash")
-
-                if "department" in request.args:
-                    filters["department"] = Department(request.args.get("department").lower())
-
-                if "experience_level" in request.args:
-                    filters["experience_level"] = ExperienceLevel(
-                        request.args.get("experience_level").lower()
-                    )
-
-                if "gender" in request.args:
-                    filters["gender"] = Gender(request.args.get("gender").lower())
+                filters = self._salary_service._build_filters(
+                    request.args,
+                    [
+                        ("company_hash", None),
+                        ("industry", Industry),
+                        ("department", Department),
+                        ("experience_level", ExperienceLevel),
+                        ("gender", Gender)
+                    ]
+                )
 
                 if not filters:
                     bargraph_data, piegraph_data = await self._salary_service.fetch_filtered_records(
@@ -150,19 +147,15 @@ class AppAPI:
                     else 1000
                 )
 
-                if "department" in request.args:
-                    filters["department"] = Department(request.args.get("department").lower())
-
-                if "industry" in request.args:
-                    filters["industry"] = Industry(request.args.get("industry").lower())
-
-                if "experience_level" in request.args:
-                    filters["experience_level"] = ExperienceLevel(
-                        request.args.get("experience_level").lower()
-                    )
-                
-                if "gender" in request.args:
-                    filters["gender"] = Gender(request.args.get("gender").lower())
+                filters = self._company_service._build_filters(
+                    request.args,
+                    [
+                        ("industry", Industry),
+                        ("department", Department),
+                        ("experience_level", ExperienceLevel),
+                        ("gender", Gender)
+                    ]
+                )
 
                 if not filters:
                     bargraph_data, current_average, piegraph_data = await self._company_service.fetch_filtered_records(
