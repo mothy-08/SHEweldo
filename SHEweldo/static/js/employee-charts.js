@@ -9,6 +9,7 @@ $(document).ready(async function () {
   await populateCompanies();
   populateDepartments();
   populateExperienceLevels();
+  populateIndustries();
   fetchData();
 
   $("#applyFilters").click(fetchData);
@@ -84,6 +85,24 @@ function populateExperienceLevels() {
   });
 }
 
+function populateIndustries() {
+  const industries = [
+    "technology",
+    "finance",
+    "healthcare",
+    "manufacturing",
+    "retail",
+    "other",
+  ];
+  const filter = document.getElementById("industryFilter");
+  industries.forEach((industry) => {
+    const option = document.createElement("option");
+    option.value = industry;
+    option.textContent = industry.charAt(0).toUpperCase() + industry.slice(1);
+    filter.appendChild(option);
+  });
+}
+
 async function fetchData() {
   try {
     const filters = {
@@ -91,6 +110,7 @@ async function fetchData() {
       department: $("#departmentFilter").val(),
       experience_level: $("#experienceLevelFilter").val(),
       gender: $("#genderFilter").val(),
+      industry: $("#industryFilter").val(),
       range_steps: $("#rangeStepFilter").val(),
     };
 
